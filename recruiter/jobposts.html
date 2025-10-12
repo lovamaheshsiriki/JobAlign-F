@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posts - Recruiter - JobAlign</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+    <style>
+        /* Copied theme variables and core styles from recruiter-dashboard.html to match design */
+        :root {
+            --color-primary: #2563EB; /* Blue */
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;
+            --color-secondary: #64748B;
+            --color-light: #F8FAFC;
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-success: #22C55E;
+            --color-warning: #F59E0B;
+            --color-danger-text: #991B1B;
+            --color-danger-bg: #FEE2E2;
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family-sans); background-color: var(--color-light); color: var(--color-secondary); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .header { background-color: var(--color-white); padding: 1rem 1.5rem; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; }
+        .navbar { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem; font-weight: 700; color: var(--color-dark); text-decoration: none; }
+        .logo i { color: var(--color-primary); }
+        .main-nav ul { display: none; list-style: none; gap: 1.25rem; }
+        .main-nav a { font-weight: 500; color: var(--color-secondary); text-decoration: none; padding-bottom: 0.25rem; }
+        .main-nav a:hover, .main-nav a.active { color: var(--color-primary); border-bottom: 2px solid var(--color-primary); }
+        .profile-icon img { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .menu-toggle { display: block; font-size: 1.25rem; cursor: pointer; background: none; border: none; color: var(--color-dark); }
+        @media (min-width: 992px) { .main-nav ul { display: flex; } .menu-toggle { display: none; } }
+        .card { background-color: var(--color-white); padding: 1rem; border-radius: var(--border-radius); box-shadow: var(--shadow); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .card-header h2 { font-size: 1.125rem; color: var(--color-dark); }
+        .btn { padding: 0.5rem 0.875rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: var(--transition-fast); border: 1px solid transparent; text-decoration: none; display: inline-block; }
+        .btn-primary { background-color: var(--color-primary); color: var(--color-white); }
+        .btn-outline { background: transparent; border: 1px solid var(--color-border); color: var(--color-dark); }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--color-border); }
+        th { font-weight: 600; color: var(--color-dark); }
+        td .job-title { font-size: 1rem; color: var(--color-dark); font-weight: 600; }
+        td .muted { color: var(--color-secondary); font-size: 0.9rem; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-weight: 600; font-size: 0.8rem; }
+        .status-active { background-color: var(--color-success); color: var(--color-white); }
+        .status-closed { background-color: var(--color-danger-bg); color: var(--color-danger-text); }
+        .status-pending, .status-shortlisted { background-color: var(--color-warning); color: var(--color-white); }
+        .actions { display: flex; gap: 0.5rem; }
+        .no-data { text-align: center; padding: 2rem; color: var(--color-secondary); }
+    /* Job details expandable row */
+    .job-details-wrap { overflow: hidden; transition: max-height 300ms ease; max-height: 0; }
+    .job-details-wrap.open { max-height: 2000px; }
+    .job-details-card { background: var(--color-white); border: 1px solid var(--color-border); padding: 1rem; border-radius: 0.5rem; box-shadow: var(--shadow); }
+    .small-spinner { display:inline-block; width:18px; height:18px; border:3px solid #e6eaf7; border-top:3px solid var(--color-primary); border-radius:50%; animation:spin 1s linear infinite; vertical-align:middle }
+    @keyframes spin { to { transform: rotate(360deg); } }
+        /* Responsive tweaks */
+        @media (max-width: 600px) {
+            th:nth-child(4), td:nth-child(4) { display: none; } /* hide applications count on very small screens */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="navbar">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-check-double"></i><span>JobAlign</span></a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="recruiter-dashboard.html">Dashboard</a></li>
+                    <li><a href="postjob.html">Post Job</a></li>
+                    <li><a href="applicants.html">Applicants</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="settings.html">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="profile-icon"><a href="profile.html"><img id="nav-company-logo" src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="Profile"></a></div>
+            <button class="menu-toggle" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>Your Job Posts</h2>
+                <div>
+                    <a href="postjob.html" class="btn btn-primary">Post New Job</a>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="jobs-table">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Date Posted</th>
+                            <th>Status</th>
+                            <th>Applications</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="5" class="no-data">Loading jobs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    (function(){
+        const API_BASE = 'http://localhost:5000/api';
+        const TOKEN_KEY = 'token';
+        const LOGIN_PAGE = 'loginforrecruiter.html';
+        const IMG_BASE = 'http://localhost:5000';
+
+        const jobsTableBody = document.querySelector('#jobs-table tbody');
+        const navImg = document.getElementById('nav-company-logo');
+
+        function escapeHtml(str){ if(!str) return ''; return String(str).replace(/[&<>\"]+/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]||s)); }
+
+        function decodeJwt(token){ try{ const payload = token.split('.')[1]; return JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/'))); }catch(e){ return null; } }
+
+        async function fetchWithAuth(url, opts={}){
+            const token = localStorage.getItem(TOKEN_KEY);
+            if(!token) throw new Error('No token');
+            const hdrs = Object.assign({ 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, opts.headers || {});
+            const res = await fetch(url, Object.assign({}, opts, { headers: hdrs }));
+            if(res.status === 401 || res.status === 403) throw new Error('Unauthorized');
+            const ct = res.headers.get('content-type')||'';
+            if(ct.includes('application/json')) return res.json();
+            return res.text();
+        }
+
+        function normalizeListResponse(res){ if(!res) return []; if(Array.isArray(res)) return res; if(res.success && Array.isArray(res.data)) return res.data; if(res.data && Array.isArray(res.data)) return res.data; return []; }
+
+        async function fetchProfile(){ return fetchWithAuth(`${API_BASE}/employer/profile`); }
+        async function fetchJobs(){ return fetchWithAuth(`${API_BASE}/jobs`); }
+        async function deleteJob(jobId){ return fetchWithAuth(`${API_BASE}/jobs/${jobId}`, { method: 'DELETE' }); }
+
+        function showNoJobs(){ jobsTableBody.innerHTML = `<tr><td colspan="5" class="no-data">No jobs found.</td></tr>`; }
+
+        function renderTable(jobs){
+            if(!jobs || jobs.length===0) return showNoJobs();
+            jobsTableBody.innerHTML = jobs.map(job=>{
+                const title = escapeHtml(job.title || job.jobTitle || 'Untitled');
+                const date = new Date(job.createdAt||job.datePosted||Date.now()).toLocaleDateString();
+                const statusInfo = getJobStatus(job);
+                const statusLabel = statusInfo.label;
+                const statusClass = statusInfo.className;
+                const applications = (job.applicationsCount || job.applications || (job._count && job._count.applications) || job._computedApplicationsCount || 0);
+                const jobId = job._id || job.id || '';
+
+                return `
+                    <tr data-id="${escapeHtml(jobId)}">
+                        <td><div class="job-title">${title}<div class="muted">${escapeHtml(job.location||job.city||'')}</div></div></td>
+                        <td>${date}</td>
+                        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                        <td class="applications-count" data-id="${escapeHtml(jobId)}">${escapeHtml(String(applications || 0))}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-outline" data-action="view" data-id="${escapeHtml(jobId)}">View</button>
+                                <button class="btn btn-outline" data-action="edit" data-id="${escapeHtml(jobId)}">Edit</button>
+                                <button class="btn btn-outline" data-action="delete" data-id="${escapeHtml(jobId)}">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Fetch all applications for an employer (used to compute per-job application counts)
+        async function fetchApplications(employerId){
+            if(!employerId) return [];
+            return fetchWithAuth(`${API_BASE}/applications/employer/${employerId}`);
+        }
+
+        // Fetch single job details by id
+        async function fetchJobDetails(jobId){
+            if(!jobId) return null;
+            try{
+                const res = await fetchWithAuth(`${API_BASE}/jobs/${jobId}`);
+                return (res && res.success) ? res.data : res;
+            }catch(e){
+                console.warn('Failed to fetch job details', e);
+                return null;
+            }
+        }
+
+        // Format helpers
+        function formatSkills(job){
+            const s = job && (job.skills || job.requiredSkills || job.skillsRequired);
+            if(!s) return 'Not specified.';
+            if(Array.isArray(s) && s.length) return s.join(', ');
+            if(typeof s === 'string' && s.trim()){
+                const parts = s.split(/\s*[;,|]\s*/).map(p => p.trim()).filter(Boolean);
+                return parts.length > 0 ? parts.join(', ') : s.trim();
+            }
+            return 'Not specified.';
+        }
+
+        function formatExperience(job){
+            const e = job && (job.experience || job.experienceRequired || job.experienceMin || job.experienceRange);
+            if(e === 0) return 'Experience: 0 years';
+            if(!e && e !== 0) return 'Fresher';
+            if(typeof e === 'number') return `Experience: ${e} years`;
+            if(typeof e === 'string' && e.trim()){
+                const t = e.trim();
+                if(/\d/.test(t)){
+                    if(/year/i.test(t)) return `Experience: ${t}`;
+                    return `Experience: ${t} years`;
+                }
+                return `Experience: ${t}`;
+            }
+            return 'Fresher';
+        }
+
+        function formatSalary(job){
+            const s = job && (job.salary || job.compensation || job.salaryRange || job.package);
+            if(s === 0) return `₹ 0 per annum`;
+            if(!s && s !== 0) return 'Negotiable';
+            if(typeof s === 'number'){
+                try{ const nf = new Intl.NumberFormat('en-IN'); return `₹ ${nf.format(s)} per annum`; }catch(e){ return `₹ ${s} per annum`; }
+            }
+            if(typeof s === 'string' && s.trim()){
+                const t = s.trim();
+                if(/[₹$]|per annum|per year|pa|per month/i.test(t)) return t;
+                if(/\d/.test(t)) return `₹ ${t} per annum`;
+                return t || 'Negotiable';
+            }
+            return 'Negotiable';
+        }
+
+        // Job status helper: prefers job.status, then job.jobStatus. If neither present, treat as 'Pending'.
+        function getJobStatus(job){
+            const rawVal = job && (job.status || job.jobStatus);
+            const raw = rawVal ? String(rawVal).toLowerCase() : '';
+            let label = 'Pending';
+            let className = 'status-pending';
+            if(raw === 'active'){
+                label = 'Active'; className = 'status-active';
+            } else if(raw === 'closed'){
+                label = 'Closed'; className = 'status-closed';
+            } else if(raw === 'draft'){
+                label = 'Draft'; className = 'status-pending';
+            } else if(raw){
+                // Unknown but present value: display a capitalized version and use pending style
+                label = String(rawVal).charAt(0).toUpperCase() + String(rawVal).slice(1);
+                className = 'status-pending';
+            }
+            return { raw, label, className };
+        }
+
+        // Render applicants list for a job into a container element
+        function renderApplicantsForJob(container, applications){
+            container.innerHTML = '';
+            if(!applications || applications.length===0){
+                container.innerHTML = '<p>No applicants yet.</p>';
+                return;
+            }
+            const ul = document.createElement('div');
+            ul.style.display = 'grid'; ul.style.gridTemplateColumns = 'repeat(auto-fit,minmax(220px,1fr))'; ul.style.gap = '0.75rem';
+            applications.forEach(a => {
+                const applicant = a.applicant || a.applicantId || {};
+                const name = (applicant && (applicant.name||applicant.fullName)) || a.applicantName || 'Applicant';
+                const email = (applicant && (applicant.email)) || a.email || '';
+                const pic = (applicant && applicant.profile && (applicant.profile.avatar || applicant.profile.profilePic)) || a.profilePic || '';
+                const card = document.createElement('div');
+                card.style.display = 'flex'; card.style.alignItems = 'center'; card.style.gap = '0.75rem'; card.style.padding = '0.5rem'; card.style.border = '1px solid var(--color-border)'; card.style.borderRadius = '0.5rem';
+                const img = document.createElement('img'); img.src = pic && pic.startsWith('/')? IMG_BASE.replace(/\/$/, '')+pic : (pic || 'https://placehold.co/40x40/E2E8F0/475569?text=U'); img.width = 40; img.height = 40; img.style.borderRadius = '50%'; img.onerror = function(){ this.onerror=null; this.src='https://placehold.co/40x40/E2E8F0/475569?text=U'; };
+                const info = document.createElement('div');
+                info.innerHTML = `<div style="font-weight:600;color:var(--color-dark)">${escapeHtml(name)}</div><div style="font-size:0.9rem;color:var(--color-secondary)">${escapeHtml(email)}</div>`;
+                card.appendChild(img); card.appendChild(info); ul.appendChild(card);
+            });
+            container.appendChild(ul);
+        }
+
+        // Toggle inline job details row under provided table row
+        async function toggleJobDetails(jobId, tableRow){
+            // If details already present just toggle
+            const next = tableRow.nextElementSibling;
+            if(next && next.classList && next.classList.contains('job-details-row')){
+                const wrap = next.querySelector('.job-details-wrap');
+                if(wrap.classList.contains('open')){ wrap.classList.remove('open'); }
+                else { wrap.classList.add('open'); }
+                return;
+            }
+
+            // Insert a new details row after this row
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'job-details-row';
+            const td = document.createElement('td'); td.colSpan = 5; td.style.padding = '0.5rem 0';
+            const wrap = document.createElement('div'); wrap.className = 'job-details-wrap';
+            const card = document.createElement('div'); card.className = 'job-details-card';
+            card.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between"><div><strong>Loading job details...</strong></div><div><span class="small-spinner"></span></div></div>`;
+            wrap.appendChild(card); td.appendChild(wrap); detailsRow.appendChild(td);
+            tableRow.parentNode.insertBefore(detailsRow, tableRow.nextSibling);
+
+            // open animation
+            // allow layout to settle
+            requestAnimationFrame(()=> wrap.classList.add('open'));
+
+            // Fetch job details and employer applications to list applicants for this job
+            try{
+                const [jobRes, appsRes] = await Promise.all([ fetchJobDetails(jobId), (async ()=>{ const token = localStorage.getItem(TOKEN_KEY); const payload = decodeJwt(token); return fetchApplications(payload && payload.id); })() ]);
+                const job = jobRes || null;
+                const allApps = normalizeListResponse(appsRes);
+                const jobApps = (allApps||[]).filter(a => { const jobObj = a && a.job; const jid = jobObj && (jobObj._id || jobObj || a.jobId || a.job); return jid && String(jid) === String(jobId); });
+
+                // Build details markup
+                card.innerHTML = '';
+                const title = document.createElement('h3'); title.textContent = job && (job.title || job.jobTitle) || 'Untitled';
+                const statusMeta = getJobStatus(job);
+                const meta = document.createElement('div'); meta.style.marginBottom = '0.5rem'; meta.innerHTML = `<small>${job && (new Date(job.createdAt||job.datePosted||Date.now()).toLocaleDateString())}</small> <span style="margin-left:1rem" class="status-badge ${statusMeta.className}">${statusMeta.label}</span>`;
+                const desc = document.createElement('div'); desc.style.margin = '0.5rem 0'; desc.innerHTML = `<h4>Description</h4><p>${escapeHtml(job && (job.description || job.jobDescription || job.summary) || '')}</p>`;
+                const detailsTable = document.createElement('table'); detailsTable.style.marginTop = '0.5rem'; detailsTable.innerHTML = `<tbody>
+                    <tr><th style="width:160px">Location</th><td>${escapeHtml(job && (job.location||job.city)||'Not specified.')}</td></tr>
+                    <tr><th>Skills</th><td>${escapeHtml(formatSkills(job))}</td></tr>
+                    <tr><th>Experience</th><td>${escapeHtml(formatExperience(job))}</td></tr>
+                    <tr><th>Salary</th><td>${escapeHtml(formatSalary(job))}</td></tr>
+                </tbody>`;
+
+                const appsSection = document.createElement('div'); appsSection.style.marginTop = '0.75rem'; appsSection.innerHTML = `<h4>Applicants (${String(jobApps.length||0)})</h4>`;
+                const appsContainer = document.createElement('div'); appsSection.appendChild(appsContainer);
+
+                card.appendChild(title); card.appendChild(meta); card.appendChild(desc); card.appendChild(detailsTable); card.appendChild(appsSection);
+                renderApplicantsForJob(appsContainer, jobApps);
+
+            }catch(err){
+                card.innerHTML = `<div style="color:#991B1B">Failed to load job details: ${escapeHtml(err.message||String(err))}</div>`;
+            }
+        }
+
+        async function init(){
+            const token = localStorage.getItem(TOKEN_KEY);
+            if(!token) return window.location.href = LOGIN_PAGE;
+            const payload = decodeJwt(token);
+            if(!payload || !payload.id) return window.location.href = LOGIN_PAGE;
+            const employerId = payload.id;
+
+            try{
+                const [profileRes, jobsRes] = await Promise.all([fetchProfile(), fetchJobs()]);
+                const profile = (profileRes && profileRes.success) ? profileRes.data : profileRes;
+                if(profile){
+                    let logo = (profile.companyDetails && profile.companyDetails.companyLogo) || profile.profilePic || null;
+                    const PLACE = 'https://placehold.co/40x40/E2E8F0/475569?text=C';
+                    if(logo && typeof logo === 'string'){
+                        if(logo.startsWith('/')) logo = IMG_BASE.replace(/\/$/, '') + logo;
+                        else if(!/^https?:\/\//i.test(logo)) logo = IMG_BASE.replace(/\/$/, '') + '/' + logo.replace(/^\//,'');
+                    } else logo = PLACE;
+                    if(navImg){ navImg.src = logo; navImg.onerror = function(){ this.onerror=null; this.src=PLACE; }}
+                }
+
+                const allJobs = normalizeListResponse(jobsRes);
+                // filter by employerId (job.company may be object or id)
+                let myJobs = (allJobs||[]).filter(j=>{ const c = j && j.company; const cid = c && (c._id||c); return cid && String(cid)===String(employerId); });
+
+                // Fetch employer applications once and compute per-job counts
+                let applications = [];
+                try {
+                    const appsRes = await fetchApplications(employerId);
+                    applications = normalizeListResponse(appsRes) || [];
+                } catch (e) {
+                    console.warn('Failed to fetch employer applications for counts', e);
+                }
+
+                // Build a map jobId => count
+                const counts = {};
+                applications.forEach(a => {
+                    const job = a && a.job;
+                    const jobId = job && (job._id || job);
+                    if (jobId) counts[jobId] = (counts[jobId] || 0) + 1;
+                });
+
+                // Attach counts to jobs (so renderTable uses them)
+                myJobs = myJobs.map(j => {
+                    const id = j && (j._id || j.id || (j._id && String(j._id)));
+                    return Object.assign({}, j, { _computedApplicationsCount: counts[id] || 0 });
+                });
+
+                // Render jobs table
+                renderTable(myJobs);
+
+                // Use event delegation for action buttons (single listener)
+                jobsTableBody.addEventListener('click', async (ev) => {
+                    const btn = ev.target.closest('button');
+                    if (!btn) return;
+                    const action = btn.getAttribute('data-action');
+                    const id = btn.getAttribute('data-id');
+                    if (!action || !id) return;
+
+                        if (action === 'view') {
+                            // Toggle inline details row for this job
+                            const row = btn.closest('tr');
+                            toggleJobDetails(id, row);
+                            return;
+                        }
+
+                    if (action === 'edit') {
+                        // Redirect to postjob for editing
+                        window.location.href = `postjob.html?jobId=${encodeURIComponent(id)}`;
+                        return;
+                    }
+
+                    if (action === 'delete') {
+                        if (!confirm('Delete this job post? This action cannot be undone.')) return;
+                        try {
+                            await deleteJob(id);
+                            // remove row from table
+                            const row = document.querySelector(`tr[data-id="${id}"]`);
+                            if (row) row.remove();
+                            // if no rows left, show no jobs
+                            if (document.querySelectorAll('#jobs-table tbody tr').length === 0) showNoJobs();
+                        } catch (err) {
+                            alert('Failed to delete job');
+                            console.error(err);
+                        }
+                        return;
+                    }
+                });
+
+            }catch(err){
+                console.error('Failed to load job posts', err);
+                if(err.message && err.message.toLowerCase().includes('unauthorized')) return window.location.href = LOGIN_PAGE;
+                jobsTableBody.innerHTML = `<tr><td colspan=\"5\" class=\"no-data\">Unable to load jobs.</td></tr>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Mobile menu toggle (copied from dashboard)
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.main-nav ul');
+        if(menuToggle){
+            menuToggle.addEventListener('click', ()=>{ navMenu.classList.toggle('active'); const icon = menuToggle.querySelector('i'); icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-xmark'); });
+            document.querySelectorAll('.main-nav a').forEach(link => link.addEventListener('click', ()=>{ if(navMenu.classList.contains('active')){ navMenu.classList.remove('active'); const icon = menuToggle.querySelector('i'); icon.classList.add('fa-bars'); icon.classList.remove('fa-xmark'); } }));
+        }
+
+    })();
+    </script>
+</body>
+</html>

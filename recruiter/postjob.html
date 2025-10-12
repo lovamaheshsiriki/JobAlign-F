@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a New Job - JobAlign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+    <style>
+        /* 1. Global Reset and Variables */
+        :root {
+            --color-primary: #2563EB; /* Blue */
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;   /* Dark Blue/Black for text */
+            --color-secondary: #64748B; /* Gray for body text */
+            --color-light: #F8FAFC;   /* Light gray for backgrounds */
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-success: #22C55E;
+            
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-light);
+            color: var(--color-secondary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* 2. Header / Navbar */
+        .header {
+            background-color: var(--color-white);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1400px; margin: 0 auto;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem;
+            font-weight: 700; color: var(--color-dark); text-decoration: none;
+        }
+        .logo i { color: var(--color-primary); }
+        .main-nav ul { display: none; list-style: none; gap: 2rem; }
+        .main-nav a {
+            font-weight: 500; color: var(--color-secondary); transition: var(--transition-fast);
+            text-decoration: none; padding-bottom: 0.5rem;
+        }
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--color-primary); border-bottom: 2px solid var(--color-primary);
+        }
+        .profile-icon img { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .menu-toggle { display: block; font-size: 1.5rem; cursor: pointer; background: none; border: none; color: var(--color-dark); }
+        
+        /* ✅ START: ADDED FOR MOBILE MENU */
+        .main-nav ul.active {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--color-white);
+            width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            gap: 1rem;
+            z-index: 1001;
+        }
+        /* ✅ END: ADDED FOR MOBILE MENU */
+
+        @media (min-width: 992px) {
+            .main-nav ul { display: flex; }
+            .menu-toggle { display: none; }
+        }
+
+        /* 3. Form Layout & Card */
+        .card {
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .card-header {
+            padding-bottom: 1rem; margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .card-header h1 { color: var(--color-dark); }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .form-group.full-width { grid-column: 1 / -1; }
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; transition: var(--transition-fast); border: 1px solid transparent;
+            text-decoration: none; display: inline-block; font-size: 1rem;
+        }
+        .btn-primary { background-color: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+        .btn-primary:hover { background-color: #1D4ED8; }
+        .btn-secondary { background-color: var(--color-white); color: var(--color-dark); border-color: var(--color-border); }
+        .btn-secondary:hover { border-color: var(--color-primary); }
+
+        /* 4. Skills Tag Input */
+        .skills-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+        }
+        .skill-tag {
+            background-color: var(--color-primary-light);
+            color: var(--color-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .skill-tag .remove-skill {
+            background: none; border: none; color: var(--color-primary);
+            cursor: pointer; font-size: 1rem; padding: 0;
+        }
+        .skills-input-container input {
+            flex-grow: 1;
+            border: none;
+            padding: 0.25rem;
+            outline: none;
+        }
+        
+        /* 5. Success Message */
+        #success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--color-primary-light);
+            border: 1px solid var(--color-primary);
+            color: var(--color-dark);
+            border-radius: var(--border-radius);
+        }
+        #success-message i {
+            color: var(--color-success);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar">
+            <a href="recruiter-dashboard.html" class="logo"><i class="fa-solid fa-check-double"></i><span>JobAlign</span></a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="recruiter-dashboard.html">Dashboard</a></li>
+                    <li><a href="#" class="active">Post Job</a></li>
+                    <li><a href="applicants.html">Applicants</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="settings.html">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="profile-icon"><a href="profile.html"><img id="nav-profile-img" src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="Profile"></a></div>
+            <button class="menu-toggle" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card" id="job-form-card">
+            <div class="card-header">
+                <h1>Post a New Job</h1>
+                <p>Fill out the details below to publish a new job opening.</p>
+            </div>
+            
+            <form id="post-job-form">
+                <!-- Alert area for validation/backend errors -->
+                <div id="form-alert" style="display:none;margin-bottom:1rem;padding:0.75rem;border-radius:0.5rem;background:#FEE2E2;color:#991B1B;"></div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="job-title">Job Title</label>
+                        <input type="text" id="job-title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job-location">Job Location</label>
+                        <input type="text" id="job-location" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="employment-type">Employment Type</label>
+                        <select id="employment-type" required>
+                            <option value="">Select type...</option>
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience-level">Experience Level</label>
+                        <select id="experience-level" required>
+                             <option value="">Select level...</option>
+                            <option value="Fresher">Fresher</option>
+                            <option value="Mid-level">Mid-level</option>
+                            <option value="Senior">Senior</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="salary-range">Salary Range (e.g., 5-8 LPA)</label>
+                        <input type="text" id="salary-range">
+                    </div>
+
+                     <div class="form-group">
+                        <label for="deadline">Application Deadline</label>
+                        <input type="date" id="deadline" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="skills">Required Skills (add with Enter or comma)</label>
+                        <div class="skills-input-container" id="skills-container">
+                             <input type="text" id="skills-input" placeholder="Type a skill and press Enter">
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="job-description">Job Description</label>
+                        <textarea id="job-description" required></textarea>
+                    </div>
+                </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary">Post Job</button>
+                    </div>
+            </form>
+        </div>
+        
+        <div class="card" id="success-message">
+            <div>
+                <i class="fas fa-check-circle"></i>
+                <h2>Job Posted Successfully!</h2>
+                <p>Your new job listing is now live. You can view it in your dashboard.</p>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        /* Post Job page script
+           - Modular functions: decodeToken, renderSkills, validateForm, postJob
+           - JWT handling: read token from localStorage, decode employerId
+           - Submits job to POST /api/jobs with Authorization header
+        */
+        (function () {
+            const API_BASE = 'http://localhost:5000/api';
+            const TOKEN_KEY = 'token';
+            const LOGIN_PAGE = 'recruiter-login.html';
+
+            // DOM elements
+            const skillsInput = document.getElementById('skills-input');
+            const skillsContainer = document.getElementById('skills-container');
+            const jobForm = document.getElementById('post-job-form');
+            const jobFormCard = document.getElementById('job-form-card');
+            const successMessage = document.getElementById('success-message');
+            const formAlert = document.getElementById('form-alert');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // State
+            let skills = [];
+
+            // --- Utility: decode JWT payload without verification ---
+            function decodeToken(token) {
+                if (!token) return null;
+                try {
+                    const payload = token.split('.')[1];
+                    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+                    return JSON.parse(json);
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            // Check token and redirect if needed
+            function ensureAuthOrRedirect() {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (!token) {
+                    window.location.href = LOGIN_PAGE;
+                    return null;
+                }
+                const payload = decodeToken(token);
+                if (!payload) {
+                    localStorage.removeItem(TOKEN_KEY);
+                    window.location.href = LOGIN_PAGE;
+                    return null;
+                }
+                // Check expiry (exp is usually seconds)
+                if (payload.exp && Date.now() >= payload.exp * 1000) {
+                    localStorage.removeItem(TOKEN_KEY);
+                    window.location.href = LOGIN_PAGE;
+                    return null;
+                }
+                return { token, payload };
+            }
+
+            // --- Skills UI ---
+            function renderSkills() {
+                // Remove existing tags except the input
+                document.querySelectorAll('.skill-tag').forEach(n => n.remove());
+                // Render tags (reverse so newest appear first)
+                skills.slice().reverse().forEach(skill => {
+                    const tag = document.createElement('span');
+                    tag.className = 'skill-tag';
+                    tag.innerHTML = `${escapeHtml(skill)} <button type="button" class="remove-skill" data-skill="${escapeHtml(skill)}">&times;</button>`;
+                    skillsContainer.prepend(tag);
+                });
+            }
+
+            function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+            // Accept Enter or comma to add skill
+            skillsInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const raw = skillsInput.value.trim();
+                    if (!raw) return skillsInput.value = '';
+                    // Split on commas to allow batch entry
+                    const parts = raw.split(',').map(p => p.trim()).filter(Boolean);
+                    let added = false;
+                    parts.forEach(p => {
+                        if (!skills.includes(p)) { skills.push(p); added = true; }
+                    });
+                    if (added) renderSkills();
+                    skillsInput.value = '';
+                }
+            });
+
+            skillsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-skill')) {
+                    const s = e.target.dataset.skill;
+                    skills = skills.filter(x => x !== s);
+                    renderSkills();
+                }
+            });
+
+            // --- Validation ---
+            function validateForm() {
+                clearFormAlert();
+                let valid = true;
+                const fields = ['job-title', 'job-location', 'employment-type', 'experience-level', 'deadline', 'job-description'];
+                fields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el.value || !el.value.toString().trim()) {
+                        el.style.borderColor = 'red'; valid = false;
+                    } else { el.style.borderColor = 'var(--color-border)'; }
+                });
+                // skills
+                if (!skills || skills.length === 0) { skillsContainer.style.borderColor = 'red'; valid = false; }
+                else { skillsContainer.style.borderColor = 'var(--color-border)'; }
+
+                if (!valid) {
+                    showFormAlert('Please fill all required fields and add at least one skill.');
+                }
+                return valid;
+            }
+
+            function showFormAlert(message) {
+                formAlert.textContent = message;
+                formAlert.style.display = 'block';
+            }
+
+            function clearFormAlert() {
+                formAlert.textContent = '';
+                formAlert.style.display = 'none';
+            }
+
+            // --- POST job to backend ---
+            async function postJob(event) {
+                event.preventDefault();
+                clearFormAlert();
+
+                const auth = ensureAuthOrRedirect();
+                if (!auth) return; // redirected
+
+                if (!validateForm()) return;
+
+                // Build payload mapped to backend Job model (avoid validation errors)
+                const rawSalary = document.getElementById('salary-range').value.trim();
+                const salary = (/^\d+(?:\.\d+)?$/.test(rawSalary)) ? Number(rawSalary) : undefined;
+
+                const payload = {
+                    // backend expects `title` & `description` & `location` & `requiredSkills` & `company` (Employer id)
+                    title: document.getElementById('job-title').value.trim(),
+                    description: document.getElementById('job-description').value.trim(),
+                    location: document.getElementById('job-location').value.trim(),
+                    requiredSkills: skills,
+                    company: auth.payload.id || auth.payload._id || auth.payload.userId || undefined,
+                    // salary is optional in backend; only set if numeric
+                    salary: salary
+                };
+                // Add optional fields expected by extended Job schema
+                payload.employmentType = document.getElementById('employment-type').value || undefined;
+                payload.experienceLevel = document.getElementById('experience-level').value || undefined;
+                payload.deadline = document.getElementById('deadline').value || undefined;
+                payload.salaryRange = document.getElementById('salary-range').value.trim() || undefined;
+
+                if (!payload.company) {
+                    showFormAlert('Unable to determine employer (company). Please login again.');
+                    localStorage.removeItem(TOKEN_KEY);
+                    return window.location.href = LOGIN_PAGE;
+                }
+
+                // Disable submit & show loading
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Posting...';
+
+                try {
+                    const res = await fetch(`${API_BASE}/jobs`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${auth.token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const contentType = res.headers.get('content-type') || '';
+                    let result = null;
+                    if (contentType.includes('application/json')) result = await res.json();
+                    else result = { success: res.ok, message: await res.text() };
+
+                    if (!res.ok) {
+                        // Try to extract validation messages
+                        let msg = `Request failed (${res.status})`;
+                        if (result) {
+                            if (Array.isArray(result)) msg = result.join('; ');
+                            else if (result.message) msg = result.message;
+                            else if (typeof result === 'object') {
+                                // Mongoose validation errors may come in result.errors
+                                if (result.errors) {
+                                    msg = Object.values(result.errors).map(e => e.message).join('; ');
+                                }
+                            }
+                        }
+                        throw new Error(msg);
+                    }
+
+                    // Success
+                    // Clear form
+                    jobForm.reset(); skills = []; renderSkills();
+                    // Hide form and show success with smooth fade
+                    jobFormCard.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    successMessage.style.opacity = 0;
+                    successMessage.style.transition = 'opacity 300ms ease, transform 300ms ease';
+                    requestAnimationFrame(() => { successMessage.style.opacity = 1; });
+
+                } catch (err) {
+                    console.error('Post job failed', err);
+                    showFormAlert(err.message || 'Failed to post job');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+
+            // Cancel button handler
+            cancelBtn.addEventListener('click', () => {
+                window.location.href = 'recruiter-dashboard.html';
+            });
+
+            // Submit handler
+            jobForm.addEventListener('submit', postJob);
+
+            // On load: ensure auth exists
+            document.addEventListener('DOMContentLoaded', () => {
+                const auth = ensureAuthOrRedirect();
+                if (!auth) return; // redirect happened
+                // render initial skills if any
+                renderSkills();
+            });
+
+        })();
+        
+
+        // --- ✅ START: ADDED MOBILE MENU TOGGLE SCRIPT ---
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.main-nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+
+        document.querySelectorAll('.main-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Only remove active class if the menu is actually open
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-xmark');
+                }
+            });
+        });
+        // --- ✅ END: ADDED MOBILE MENU TOGGLE SCRIPT ---
+        // --- Navbar logo: dynamically load employer/company logo from backend if available ---
+        (function() {
+            const navImg = document.getElementById('nav-profile-img');
+            const API_BASE = 'http://localhost:5000/api';
+            const TOKEN_KEY = 'token';
+
+            function decodeToken(token) {
+                if (!token) return null;
+                try {
+                    const payload = token.split('.')[1];
+                    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+                    return JSON.parse(json);
+                } catch (err) { return null; }
+            }
+
+            function normalizeUrl(url) {
+                if (!url) return null;
+                // already absolute
+                if (url.startsWith('http://') || url.startsWith('https://')) return url;
+                // handle backslashes
+                url = url.replace(/\\/g, '/');
+                if (url.startsWith('/')) return window.location.origin + url;
+                // assume it's under /uploads on backend
+                return window.location.origin + '/' + url.replace(/^\/?/, '');
+            }
+
+            async function fetchAndSetLogo() {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (!token) return;
+                try {
+                    // Backend provides token-based GET /api/employer/profile
+                    const res = await fetch(`${API_BASE}/employer/profile`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    const data = (json && json.success) ? json.data : json;
+                    const logo = data && data.companyDetails && (data.companyDetails.companyLogo || data.companyLogo || data.companyDetails.logo);
+                    const normalized = normalizeUrl(logo);
+                    if (normalized) navImg.src = normalized;
+                } catch (err) {
+                    // ignore; keep default image
+                    console.debug('Failed to load employer logo', err);
+                }
+            }
+
+            // Run on DOM ready
+            document.addEventListener('DOMContentLoaded', fetchAndSetLogo);
+        })();
+    </script>
+</body>
+</html>

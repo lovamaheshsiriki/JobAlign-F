@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Seeker Dashboard - JobAlign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome is assumed to be in this path -->
+    <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+
+    <style>
+        /* 1. Global Reset and Variables */
+        :root {
+            --color-primary: #2563EB;
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;
+            --color-secondary: #64748B;
+            --color-light: #F1F5F9;
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-success: #22C55E;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-light);
+            color: var(--color-secondary);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        /* Helper class for loading/empty states */
+        .placeholder-text {
+            text-align: center;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        /* 2. Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        /* 3. Reusable Components */
+        .card {
+            background-color: var(--color-white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.65rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #1D4ED8;
+        }
+        
+        .btn:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .badge {
+            background-color: var(--color-dark);
+            color: var(--color-white);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        /* Status-specific badge colors */
+        .badge.status-pending { background-color: var(--color-warning); }
+        .badge.status-shortlisted { background-color: var(--color-primary); }
+        .badge.status-rejected { background-color: var(--color-danger); }
+        .badge.status-selected { background-color: var(--color-success); }
+
+
+        /* 4. Header */
+        .header {
+            background-color: var(--color-white);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        .logo i {
+            color: var(--color-primary);
+            background-color: var(--color-primary-light);
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .search-bar {
+            display: none;
+            position: absolute; /* center in header */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1100;
+        }
+
+        .search-bar input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            width: 420px;
+            background: var(--color-white);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-secondary);
+            cursor: pointer;
+            z-index: 1110;
+        }
+
+        .main-nav ul {
+            display: none;
+            list-style: none;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .main-nav ul.active {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--color-white);
+            width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            gap: 1rem;
+            z-index: 1001;
+        }
+
+        .main-nav a {
+            font-weight: 500;
+            color: var(--color-secondary);
+            transition: var(--transition-fast);
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--color-primary);
+        }
+        
+        .menu-toggle {
+            display: block;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--color-dark);
+        }
+
+        @media (min-width: 768px) {
+            .search-bar { display: block; }
+        }
+
+        @media (min-width: 1024px) {
+            .main-nav ul { display: flex; }
+            .menu-toggle { display: none; }
+        }
+
+        /* 5. Main Content Area */
+        .welcome-header h1 {
+            font-size: 2.25rem;
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+        }
+
+        .profile-completion .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .profile-completion h3 {
+            color: var(--color-dark);
+            font-weight: 600;
+        }
+
+        .profile-completion .percentage {
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--color-light);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--color-primary);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .job-recommendations h2 {
+            font-size: 1.5rem;
+            color: var(--color-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filters .btn {
+            background-color: var(--color-white);
+            border: 1px solid var(--color-border);
+            color: var(--color-secondary);
+            padding: 0.5rem 1rem;
+        }
+
+        .filters .btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .job-listings {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .job-listings { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .job-card {
+            border: 1px solid var(--color-border);
+            transition: var(--transition-fast);
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        .job-card h3 {
+            color: var(--color-dark);
+            font-size: 1.125rem;
+        }
+
+        .job-card .company {
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .job-details {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .job-details li {
+            margin-bottom: 0.5rem;
+        }
+
+        .job-card .apply-btn {
+            width: 100%;
+        }
+
+        /* 6. Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar .card h3 {
+            font-size: 1.25rem;
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .applications-list {
+            list-style-type: none;
+        }
+
+        .applications-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .applications-list li:last-child {
+            border-bottom: none;
+        }
+
+        .profile-snapshot {
+            text-align: center;
+        }
+
+        .profile-snapshot img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 3px solid var(--color-primary-light);
+            object-fit: cover;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .skills-tags span {
+            background-color: var(--color-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        /* Small dropdowns for recommendations filters */
+        .filters { position: relative; }
+        .filter-btn-wrapper { position: relative; display: inline-block; }
+        .rec-filter-dropdown {
+            position: absolute; top: calc(100% + 0.5rem); left: 0; background: var(--color-white); border:1px solid var(--color-border);
+            padding: 0.5rem; border-radius:0.5rem; box-shadow: var(--shadow); min-width: 220px; display:none; z-index:1200;
+            max-height: 260px; overflow:auto;
+        }
+        .rec-filter-dropdown.open { display:block; }
+        .rec-filter-option { display:flex; align-items:center; gap:0.5rem; padding:0.4rem; cursor:pointer; border-radius:0.35rem }
+        .rec-filter-option:hover { background: var(--color-primary-light); }
+        .rec-filter-actions { display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header class="header">
+            <a href="../index.html" class="logo">
+                <i class="fa-solid fa-check-double"></i>
+                <span>JobAlign</span>
+            </a>
+            <div class="search-bar">
+                <i class="fa-solid fa-search"></i>
+                <input type="search" placeholder="Search for jobs...">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="jobsforjobseeker.html">Jobs</a></li>
+                    <li><a href="applicationsforjobseeker.html">Applications</a></li>
+                    <li><a href="profileforjobseeker.html">Profile</a></li>
+                    <!-- CHANGE: Replaced Logout with Settings -->
+                    <li><a href="settingsforjobseeker.html">Settings</a></li>
+                </ul>
+            </nav>
+            <button class="menu-toggle" aria-label="Toggle Navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="main-dashboard">
+                <div class="welcome-header">
+                    <h1 id="welcome-message">Loading...</h1>
+                </div>
+                <section class="profile-completion card">
+                    <div class="card-header">
+                        <h3>Profile Completion</h3>
+                        <span class="percentage" id="profile-percentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="profile-progress"></div>
+                    </div>
+                </section>
+                <section class="job-recommendations">
+                    <h2>Job Recommendations</h2>
+                    <div class="filters">
+                        <button class="btn"><i class="fa-solid fa-location-dot"></i> Location</button>
+                        <button class="btn"><i class="fa-solid fa-briefcase"></i> Job Type</button>
+                    </div>
+                    <div class="job-listings" id="job-listings">
+                        <p class="placeholder-text">Loading jobs...</p>
+                    </div>
+                </section>
+            </div>
+            <aside class="sidebar">
+                <div class="profile-snapshot card">
+                    <div id="profile-snapshot-content">
+                        <p class="placeholder-text">Loading profile...</p>
+                    </div>
+                </div>
+                <div class="my-applications card">
+                    <h3>My Applications</h3>
+                    <ul class="applications-list" id="applications-list">
+                         <p class="placeholder-text">Loading applications...</p>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === API & Authentication Configuration ===
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const BACKEND_BASE = API_BASE_URL.replace(/\/api$/, '');
+    const makeFileUrl = (pth) => {
+        if (!pth) return null;
+        if (pth.startsWith('http://') || pth.startsWith('https://')) return pth;
+        if (pth.startsWith('/')) return BACKEND_BASE + pth;
+        return BACKEND_BASE + '/' + pth;
+    };
+
+    // Helper to extract company name (handles nested objects)
+    const getCompanyName = (job) => {
+        if (!job) return '';
+        if (typeof job.company === 'string') return job.company;
+        if (job.company && typeof job.company === 'object') {
+            return job.company.name || job.company.fullName || job.company.companyName || '';
+        }
+        if (job.companyName) return job.companyName;
+        if (job.companyDetails) return job.companyDetails.fullName || job.companyDetails.name || '';
+        return '';
+    };
+
+    const normalizeSkillsArray = (job) => {
+        if (!job) return [];
+        if (Array.isArray(job.requiredSkills)) return job.requiredSkills;
+        if (Array.isArray(job.skills)) return job.skills;
+        if (typeof job.requiredSkills === 'string' && job.requiredSkills.trim()) return job.requiredSkills.split(/[,;|]/).map(s=>s.trim()).filter(Boolean);
+        if (typeof job.skills === 'string' && job.skills.trim()) return job.skills.split(/[,;|]/).map(s=>s.trim()).filter(Boolean);
+        return [];
+    };
+
+    // Format salary from different backend shapes
+    const formatSalary = (job) => {
+        if (!job) return 'Not Disclosed';
+        // common fields: salaryrange (string), salaryRange (object), salary (number/string), compensation
+        if (job.salaryrange && typeof job.salaryrange === 'string' && job.salaryrange.trim()) return job.salaryrange;
+        if (job.salaryRange && typeof job.salaryRange === 'string' && job.salaryRange.trim()) return job.salaryRange;
+        if (job.salaryRange && typeof job.salaryRange === 'object') {
+            const min = job.salaryRange.min || job.salaryRange.minSalary || job.salaryRange.from;
+            const max = job.salaryRange.max || job.salaryRange.maxSalary || job.salaryRange.to;
+            if (min != null && max != null) return `${min.toLocaleString()} - ${max.toLocaleString()}`;
+            if (min != null) return `${min.toLocaleString()}`;
+        }
+        if (job.salary !== undefined && job.salary !== null && job.salary !== '') return (typeof job.salary === 'number' ? job.salary.toLocaleString() : job.salary);
+        if (job.compensation !== undefined && job.compensation !== null && job.compensation !== '') return (typeof job.compensation === 'number' ? job.compensation.toLocaleString() : job.compensation);
+        // support min/max fields
+        if ((job.salaryMin !== undefined && job.salaryMax !== undefined) || (job.minSalary !== undefined && job.maxSalary !== undefined)) {
+            const a = job.salaryMin !== undefined ? job.salaryMin : job.minSalary;
+            const b = job.salaryMax !== undefined ? job.salaryMax : job.maxSalary;
+            if (a != null && b != null) return `${a.toLocaleString()} - ${b.toLocaleString()}`;
+        }
+        return 'Not Disclosed';
+    };
+
+    // Small helper to map backend status variants to canonical labels
+    const normalizeAppStatus = (raw) => {
+        if (!raw) return 'Pending';
+        const s = raw.toString().toLowerCase();
+        if (s === 'reviewed') return 'Shortlisted';
+        if (s === 'shortlisted') return 'Shortlisted';
+        if (s === 'accepted' || s === 'selected' || s === 'hired') return 'Selected';
+        if (s === 'rejected' || s === 'declined') return 'Rejected';
+        if (s === 'pending' || s === 'applied') return 'Pending';
+        // fallback: capitalize
+        return raw.toString().charAt(0).toUpperCase() + raw.toString().slice(1);
+    };
+
+    // === DOM Element References ===
+    const welcomeMessage = document.getElementById('welcome-message');
+    const profileProgress = document.getElementById('profile-progress');
+    const profilePercentage = document.getElementById('profile-percentage');
+    const jobListingsContainer = document.getElementById('job-listings');
+    const applicationsList = document.getElementById('applications-list');
+    const profileSnapshotContainer = document.getElementById('profile-snapshot-content');
+    const headerSearchInput = document.querySelector('.search-bar input');
+    const headerSearchIcon = document.querySelector('.search-bar i');
+    
+    // CHANGE: Removed the logout button query selector as it's no longer in the nav
+
+    const parseJwt = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error("Failed to parse JWT:", e);
+            return null;
+        }
+    };
+
+    // debounce utility
+    const debounce = (fn, wait=300) => {
+        let t = null;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), wait);
+        };
+    };
+
+    const performHeaderSearch = (q) => {
+        const query = (q||'').toString().trim().toLowerCase();
+        if (!query) {
+            renderJobs(allJobs, allApplications);
+            return;
+        }
+        const filtered = allJobs.filter(j => {
+            const title = (j.title||'').toString().toLowerCase();
+            const company = getCompanyName(j).toString().toLowerCase();
+            const loc = ((j.location||j.city)||'').toString().toLowerCase();
+            const skills = normalizeSkillsArray(j).join(' ').toString().toLowerCase();
+            return title.includes(query) || company.includes(query) || loc.includes(query) || skills.includes(query);
+        });
+        renderJobs(filtered, allApplications);
+    };
+
+    const debouncedHeaderSearch = debounce((e) => performHeaderSearch(e.target.value), 250);
+
+    const handleUnauthorized = () => {
+        console.error("Authentication error: Invalid or expired token. Redirecting to login.");
+        localStorage.removeItem('token');
+        window.location.href = 'loginforjobseeker.html';
+    }; 
+
+    const fetchWithAuth = async (endpoint, options = {}) => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+        
+        if (response.status === 401 || response.status === 403) {
+            throw new Error('Unauthorized');
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+             if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Failed to fetch ${endpoint}: ${response.statusText}`);
+            }
+            return response.json();
+        } else {
+             if (!response.ok) {
+                throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
+            }
+            return {};
+        }
+    };
+
+    // Keep a copy of the fetched data for client-side filtering/search
+    let allJobs = [];
+    let allApplications = [];
+
+    const loadDashboard = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return handleUnauthorized();
+        }
+
+        const decodedToken = parseJwt(token);
+        if (!decodedToken || !decodedToken.exp || decodedToken.exp * 1000 < Date.now()) {
+            return handleUnauthorized();
+        }
+
+        const normalizedRole = (decodedToken.role || '').replace(/_/g, '').toLowerCase();
+        if (normalizedRole !== 'jobseeker') {
+            return handleUnauthorized();
+        }
+
+        try {
+            const [profileRes, jobsRes, applicationsRes] = await Promise.all([
+                fetchWithAuth('/users/me'),
+                fetchWithAuth('/jobs'),
+                fetchWithAuth('/users/me/applications')
+            ]);
+
+            const profile = profileRes.data || profileRes;
+            const jobs = jobsRes.data || jobsRes;
+            const applications = applicationsRes.data || applicationsRes;
+
+            // store for search/filter operations
+            allJobs = Array.isArray(jobs) ? jobs : (jobs || []);
+            allApplications = Array.isArray(applications) ? applications : (applications || []);
+
+            renderProfile(profile);
+            renderJobs(allJobs, allApplications);
+            renderApplications(allApplications);
+
+        } catch (error) {
+            console.error('Dashboard loading failed:', error);
+            if (error.message === 'Unauthorized') {
+                handleUnauthorized();
+            } else {
+                welcomeMessage.textContent = "Error loading data. Please try again later.";
+            }
+        }
+    };
+    
+    const renderProfile = (profile) => {
+        const fullName = profile.fullName || profile.name || (profile.profile && profile.profile.fullName) || 'User';
+        const firstName = fullName.split(' ')[0];
+        welcomeMessage.textContent = `Hello ${firstName} 👋`;
+
+    const avatarPath = profile.avatar || (profile.profile && profile.profile.avatar);
+    const avatarUrl = makeFileUrl(avatarPath) || 'https://placehold.co/80x80/E2E8F0/475569?text=User';
+        const skills = profile.skills || (profile.profile && profile.profile.skills) || [];
+        const resumeUrl = profile.resumeUrl || (profile.profile && profile.profile.resumeUrl);
+
+        profileSnapshotContainer.innerHTML = `
+            <img src="${avatarUrl}" alt="${fullName}'s Profile Picture">
+            <h3>${fullName}</h3>
+            <div class="skills-tags">
+                ${skills.length > 0
+                    ? skills.map(skill => `<span>${skill}</span>`).join('')
+                    : '<p>No skills added yet.</p>'
+                }
+            </div>
+        `;
+
+    let completion = 20;
+    if (skills.length > 0) completion += 30;
+    if (resumeUrl) completion += 30;
+    if (avatarPath && !avatarUrl.includes('placehold.co')) completion += 20;
+
+        profilePercentage.textContent = `${completion}%`;
+        profileProgress.style.width = `${completion}%`;
+    };
+    
+    const renderJobs = (jobs, applications) => {
+        jobListingsContainer.innerHTML = '';
+        if (!jobs || jobs.length === 0) {
+            jobListingsContainer.innerHTML = '<p class="placeholder-text">No job recommendations found.</p>';
+            return;
+        }
+
+    const appliedJobIds = new Set((applications||[]).map(app => app.job && app.job._id).filter(id => id));
+    // Populate recommendation filters based on jobs (pass applications so filtered render keeps applied state)
+    populateRecommendationFilters(jobs, applications);
+
+        jobs.slice(0, 4).forEach(job => { // Limit to 4 jobs for the dashboard view
+            const hasApplied = appliedJobIds.has(job._id);
+            const jobCard = document.createElement('div');
+            jobCard.className = 'card job-card';
+            const companyName = getCompanyName(job) || 'N/A';
+            const skills = normalizeSkillsArray(job);
+            jobCard.innerHTML = `
+                <h3>${job.title}</h3>
+                <p class="company">${companyName}</p>
+                <ul class="job-details">
+                    <li><strong>Location:</strong> ${job.location || 'N/A'}</li>
+                    <li><strong>Salary:</strong> ${formatSalary(job)}</li>
+                </ul>
+                <div class="skills-tags">${skills.map(s=>`<span>${s}</span>`).join('')}</div>
+                <button class="btn btn-primary apply-btn" data-job-id="${job._id}" ${hasApplied ? 'disabled' : ''}>
+                    ${hasApplied ? 'Applied' : 'Apply'}
+                </button>
+            `;
+            jobListingsContainer.appendChild(jobCard);
+        });
+    };
+
+    // Populate Skills and Job Type dropdowns for recommendations
+    const populateRecommendationFilters = (jobs, applications=[]) => {
+        const skillsSet = new Set();
+        const typesSet = new Set();
+        const locationsSet = new Set();
+        (jobs || []).forEach(j => {
+            normalizeSkillsArray(j).forEach(s => s && skillsSet.add(s));
+            const jt = (j.employmentType || j.jobType || '').toString().trim(); if (jt) typesSet.add(jt);
+            const loc = (j.location || j.city || '').toString().trim(); if (loc) locationsSet.add(loc);
+        });
+
+        // find filters area
+        const filtersArea = document.querySelector('.job-recommendations .filters');
+        // clear existing filters and dropdowns
+        filtersArea.innerHTML = '';
+
+        // Helper to create wrapper/button/dropdown
+        const mkWrapper = (label) => {
+            const wrapper = document.createElement('div'); wrapper.className = 'filter-btn-wrapper';
+            const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = label;
+            const dropdown = document.createElement('div'); dropdown.className = 'rec-filter-dropdown';
+            wrapper.appendChild(btn); wrapper.appendChild(dropdown);
+            return { wrapper, btn, dropdown };
+        };
+
+        // Location
+        const { wrapper: locWrapper, btn: locBtn, dropdown: locDropdown } = mkWrapper('Location');
+        Array.from(locationsSet).sort().forEach(loc => {
+            const opt = document.createElement('div'); opt.className='rec-filter-option'; opt.textContent = loc; opt.dataset.value = loc;
+            locDropdown.appendChild(opt);
+        });
+
+        // Job Type
+        const { wrapper: typeWrapper, btn: typeBtn, dropdown: typeDropdown } = mkWrapper('Job Type');
+        Array.from(typesSet).sort().forEach(t => {
+            const opt = document.createElement('div'); opt.className='rec-filter-option'; opt.textContent = t; opt.dataset.value = t;
+            typeDropdown.appendChild(opt);
+        });
+
+        // Skills (multi-select)
+        const { wrapper: skillsWrapper, btn: skillsBtn, dropdown: skillsDropdown } = mkWrapper('Skills');
+        Array.from(skillsSet).sort().forEach(s => {
+            const opt = document.createElement('div'); opt.className='rec-filter-option';
+            const chk = document.createElement('input'); chk.type='checkbox'; chk.style.marginRight='0.5rem'; chk.value = s;
+            const span = document.createElement('span'); span.textContent = s;
+            opt.appendChild(chk); opt.appendChild(span);
+            // clicking the option toggles the checkbox (but not when clicking the checkbox directly)
+            opt.addEventListener('click', (e) => {
+                if (e.target.tagName.toLowerCase() === 'input') return; // let default checkbox toggling happen
+                chk.checked = !chk.checked;
+            });
+            skillsDropdown.appendChild(opt);
+        });
+        const applyClear = document.createElement('div'); applyClear.className='rec-filter-actions';
+        const applyBtn = document.createElement('button'); applyBtn.className='btn btn-primary'; applyBtn.textContent='Apply';
+        const clearBtn = document.createElement('button'); clearBtn.className='btn'; clearBtn.textContent='Clear';
+        applyClear.appendChild(clearBtn); applyClear.appendChild(applyBtn); skillsDropdown.appendChild(applyClear);
+
+        // append all wrappers
+        filtersArea.appendChild(locWrapper);
+        filtersArea.appendChild(typeWrapper);
+        filtersArea.appendChild(skillsWrapper);
+
+        // wire events: open/close
+        locBtn.addEventListener('click', ()=>{ locDropdown.classList.toggle('open'); typeDropdown.classList.remove('open'); skillsDropdown.classList.remove('open'); });
+        typeBtn.addEventListener('click', ()=>{ typeDropdown.classList.toggle('open'); locDropdown.classList.remove('open'); skillsDropdown.classList.remove('open'); });
+        skillsBtn.addEventListener('click', ()=>{ skillsDropdown.classList.toggle('open'); typeDropdown.classList.remove('open'); locDropdown.classList.remove('open'); });
+
+        // Location selection
+        locDropdown.addEventListener('click', (e)=>{
+            const opt = e.target.closest('.rec-filter-option');
+            if (!opt) return;
+            const val = opt.dataset.value || opt.textContent;
+            const filtered = (jobs||[]).filter(j => ((j.location||j.city)||'').toString().toLowerCase().includes(val.toString().toLowerCase()));
+            renderJobs(filtered, applications);
+            locDropdown.classList.remove('open');
+        });
+
+        // Job type selection
+        typeDropdown.addEventListener('click', (e)=>{
+            const opt = e.target.closest('.rec-filter-option');
+            if (!opt) return;
+            const val = opt.dataset.value || opt.textContent;
+            const filtered = (jobs||[]).filter(j => ((j.employmentType||j.jobType)||'').toString().toLowerCase().includes(val.toString().toLowerCase()));
+            renderJobs(filtered, applications);
+            typeDropdown.classList.remove('open');
+        });
+
+        // Skills apply/clear handling (use captured apply/clear buttons)
+        applyBtn.addEventListener('click', (e) => {
+            const checked = Array.from(skillsDropdown.querySelectorAll('input[type=checkbox]')).filter(c=>c.checked).map(c=>c.value);
+            const filtered = (jobs||[]).filter(j => {
+                const js = normalizeSkillsArray(j).map(x=>x.toLowerCase());
+                return checked.every(k => js.includes(k.toLowerCase()));
+            });
+            renderJobs(filtered, applications);
+            skillsDropdown.classList.remove('open');
+        });
+        clearBtn.addEventListener('click', (e) => {
+            skillsDropdown.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+            renderJobs(jobs, applications);
+            skillsDropdown.classList.remove('open');
+        });
+    };
+    
+    const renderApplications = (applications) => {
+        applicationsList.innerHTML = '';
+        if (!applications || applications.length === 0) {
+            applicationsList.innerHTML = '<p class="placeholder-text">No applications yet.</p>';
+            return;
+        }
+        const statusCounts = { Pending: 0, Shortlisted: 0, Rejected: 0, Selected: 0 };
+        applications.forEach(app => {
+            const canonical = normalizeAppStatus(app.status);
+            if (statusCounts.hasOwnProperty(canonical)) statusCounts[canonical]++;
+        });
+        Object.keys(statusCounts).forEach(status => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <span>${status}</span> 
+                <span class="badge status-${status.toLowerCase()}">${statusCounts[status]}</span>
+            `;
+            applicationsList.appendChild(listItem);
+        });
+    };
+
+    // === Event Listeners ===
+    // CHANGE: Removed click listener for the logout button
+    // Header search interactions
+    if (headerSearchInput) {
+        headerSearchInput.addEventListener('keyup', (e) => {
+            // Enter triggers immediate search
+            if (e.key === 'Enter') {
+                performHeaderSearch(headerSearchInput.value);
+                return;
+            }
+            debouncedHeaderSearch(e);
+        });
+        // Small UX: clicking the icon triggers search and focuses input
+        if (headerSearchIcon) {
+            headerSearchIcon.addEventListener('click', () => {
+                performHeaderSearch(headerSearchInput.value);
+                headerSearchInput.focus();
+            });
+        }
+    }
+    jobListingsContainer.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('apply-btn')) {
+            const button = e.target;
+            const jobId = button.dataset.jobId;
+            button.disabled = true;
+            button.textContent = 'Applying...';
+            
+            try {
+                const result = await fetchWithAuth(`/jobs/${jobId}/apply`, { method: 'POST' });
+                alert('Application successful!');
+                button.textContent = 'Applied';
+                
+                const applicationsRes = await fetchWithAuth('/users/me/applications');
+                const updatedApplications = applicationsRes.data || applicationsRes;
+                renderApplications(updatedApplications);
+
+            } catch (error) {
+                console.error('Failed to apply:', error);
+                alert(error.message || 'Application failed. You may have already applied.');
+                button.disabled = false;
+                button.textContent = 'Apply';
+            }
+        }
+    });
+
+    loadDashboard();
+});
+
+// --- MOBILE MENU TOGGLE ---
+const menuToggle = document.querySelector('.menu-toggle');
+const navMenu = document.querySelector('.main-nav ul');
+menuToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    const icon = menuToggle.querySelector('i');
+    icon.classList.toggle('fa-bars');
+    icon.classList.toggle('fa-xmark');
+});
+</script>
+</body>
+</html>
+

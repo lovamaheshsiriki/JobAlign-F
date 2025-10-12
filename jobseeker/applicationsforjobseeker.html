@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - JobAlign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+    <style>
+        /* 1. Global Reset and Variables */
+        :root {
+            --color-primary: #2563EB; /* Blue */
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;   /* Dark Blue/Black for text */
+            --color-secondary: #64748B; /* Gray for body text */
+            --color-light-gray: #F1F5F9; /* Light gray for backgrounds */
+            --color-bg: #F8FAFC;
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            
+            /* Status Colors */
+            --color-pending-bg: #FEF3C7;
+            --color-pending-text: #B45309;
+            --color-shortlisted-bg: #D1FAE5;
+            --color-shortlisted-text: #065F46;
+            --color-selected-bg: #DBEAFE;
+            --color-selected-text: #1E40AF;
+            --color-rejected-bg: #FEE2E2;
+            --color-rejected-text: #991B1B;
+            
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-bg);
+            color: var(--color-secondary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        /* 2. Header / Navbar */
+        .header {
+            background-color: var(--color-white);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            text-decoration: none;
+        }
+
+        .logo i { color: var(--color-primary); }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .main-nav { display: none; }
+        
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .main-nav a {
+            font-weight: 500;
+            color: var(--color-secondary);
+            transition: var(--transition-fast);
+            text-decoration: none;
+            padding-bottom: 0.5rem;
+        }
+
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        .profile-icon img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+        }
+        
+        .menu-toggle {
+            display: block;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--color-dark);
+        }
+
+        .main-nav.active ul {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--color-white);
+            width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            gap: 1rem;
+            z-index: 1001;
+        }
+
+        @media (min-width: 992px) {
+            .main-nav { display: block; }
+            .menu-toggle { display: none; }
+        }
+
+        /* 3. Main Applications Section */
+        .applications-container {
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .applications-header h1 {
+            color: var(--color-dark);
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .applications-header p {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 4. Filters */
+        .filters {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 640px) {
+           .filters {
+               flex-direction: row;
+               justify-content: space-between;
+               align-items: center;
+           }
+        }
+        
+        .search-bar {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-secondary);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        .filter-btn {
+            padding: 0.65rem 1rem;
+            border: 1px solid var(--color-border);
+            background-color: var(--color-white);
+            color: var(--color-secondary);
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            white-space: nowrap;
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--color-primary);
+        }
+        
+        .filter-btn.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+        }
+
+        /* 5. Applications List */
+        #applications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .application-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            transition: var(--transition-fast);
+            gap: 1rem;
+        }
+        
+        .application-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--color-primary);
+        }
+        
+        @media (min-width: 768px) {
+            .application-card {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        .job-details h3 {
+            color: var(--color-dark);
+            margin-bottom: 0.25rem;
+        }
+        
+        .job-details h3 a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .job-details h3 a:hover {
+            text-decoration: underline;
+        }
+        
+        .job-meta {
+            font-size: 0.9rem;
+        }
+        
+        .application-status-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: capitalize;
+        }
+        
+        .status-badge.pending { background-color: var(--color-pending-bg); color: var(--color-pending-text); }
+        .status-badge.shortlisted { background-color: var(--color-shortlisted-bg); color: var(--color-shortlisted-text); }
+        .status-badge.selected { background-color: var(--color-selected-bg); color: var(--color-selected-text); }
+        .status-badge.rejected { background-color: var(--color-rejected-bg); color: var(--color-rejected-text); }
+        
+        .btn-primary {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition-fast);
+        }
+        .btn-primary:hover {
+            background-color: #1D4ED8;
+        }
+        
+        /* 6. Pagination */
+        .pagination {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pagination button, .pagination span {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--color-border);
+            background-color: var(--color-white);
+            color: var(--color-secondary);
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .pagination button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .pagination span.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar">
+            <a href="jobseeker-dashboard.html" class="logo">
+                <i class="fa-solid fa-check-double"></i>
+                <span>JobAlign</span>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="jobseeker-dashboard.html">Dashboard</a></li>
+                    <li><a href="jobsforjobseeker.html">Jobs</a></li>
+                    <li><a href="#" class="active">Applications</a></li>
+                    <li><a href="profileforjobseeker.html">Profile</a></li>
+                    <li><a href="settingsforjobseeker.html">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="nav-right">
+                <div class="profile-icon">
+                    <a href="profileforjobseeker.html"><img id="profile-pic-nav" src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="Profile"></a>
+                </div>
+                <button class="menu-toggle" aria-label="Toggle Navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="applications-container">
+            <div class="applications-header">
+                <h1>My Applications</h1>
+                <p>Track your applied jobs and their statuses.</p>
+            </div>
+
+            <div class="filters">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="search" id="search-input" placeholder="Search by job title or company...">
+                </div>
+                <div class="filter-buttons" id="filter-buttons">
+                    <button class="filter-btn active" data-status="All">All</button>
+                    <button class="filter-btn" data-status="Pending">Pending</button>
+                    <button class="filter-btn" data-status="Shortlisted">Shortlisted</button>
+                    <button class="filter-btn" data-status="Selected">Selected</button>
+                    <button class="filter-btn" data-status="Rejected">Rejected</button>
+                </div>
+            </div>
+
+            <div id="applications-list">
+                <p class="placeholder-text">Loading applications...</p>
+            </div>
+            
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </main>
+    
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === API & Authentication Configuration ===
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const BACKEND_BASE = API_BASE_URL.replace(/\/api$/, '');
+    const makeFileUrl = (pth) => {
+        if (!pth) return null;
+        if (pth.startsWith('http://') || pth.startsWith('https://')) return pth;
+        if (pth.startsWith('/')) return BACKEND_BASE + pth;
+        return BACKEND_BASE + '/' + pth;
+    };
+    let allFetchedApplications = [];
+
+    // === State Management ===
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let currentStatusFilter = 'All';
+    let currentSearchTerm = '';
+
+    // === DOM Element References ===
+    const appListContainer = document.getElementById('applications-list');
+    const paginationContainer = document.getElementById('pagination');
+    const filterButtonsContainer = document.getElementById('filter-buttons');
+    const searchInput = document.getElementById('search-input');
+    const profilePicNav = document.getElementById('profile-pic-nav');
+    
+    // === Authentication Helper Functions ===
+    const parseJwt = (token) => {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) { return null; }
+    };
+
+    const handleUnauthorized = () => {
+        localStorage.removeItem('token');
+        window.location.href = 'loginforjobseeker.html';
+    };
+
+    const fetchWithAuth = async (endpoint, options = {}) => {
+        const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, { ...options, headers });
+
+        if (response.status === 401 || response.status === 403) throw new Error('Unauthorized');
+        
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'API Error');
+            return data;
+        }
+
+        if (!response.ok) throw new Error('API Error');
+        return {};
+    };
+
+    // === Main Function to Load Page Data ===
+    const loadPage = async () => {
+        // --- Authentication Check ---
+        const token = localStorage.getItem('token');
+        if (!token) return handleUnauthorized();
+        const decodedToken = parseJwt(token);
+        if (!decodedToken || decodedToken.exp * 1000 < Date.now() || (decodedToken.role || '').replace(/_/g, '').toLowerCase() !== 'jobseeker') {
+            return handleUnauthorized();
+        }
+        
+        try {
+            // Fetch profile and applications data from the backend
+            const [profileRes, applicationsRes] = await Promise.all([
+                fetchWithAuth('/users/me'),
+                fetchWithAuth('/users/me/applications')
+            ]);
+
+            const profile = profileRes.data || profileRes;
+            allFetchedApplications = applicationsRes.data || applicationsRes;
+            
+            updateProfilePic(profile);
+            renderFilteredApplications(); // Initial render of the fetched data
+
+        } catch (error) {
+            console.error('Failed to load page:', error);
+            appListContainer.innerHTML = `<p class="placeholder-text">Could not load applications. Please try again later.</p>`;
+            if (error.message === 'Unauthorized') handleUnauthorized();
+        }
+    };
+
+    // === UI Rendering Functions ===
+
+    // Helper to extract company name robustly from various possible shapes
+    const getJobCompanyName = (job) => {
+        if (!job) return '';
+        // preferred: job.companyName
+        if (typeof job.companyName === 'string' && job.companyName.trim()) return job.companyName.trim();
+        // job.companyDetails.fullName or job.companyDetails.name
+        if (job.companyDetails) {
+            if (typeof job.companyDetails.fullName === 'string' && job.companyDetails.fullName.trim()) return job.companyDetails.fullName.trim();
+            if (typeof job.companyDetails.name === 'string' && job.companyDetails.name.trim()) return job.companyDetails.name.trim();
+        }
+        // job.company may be a string id or nested object with name/fullName/companyName
+        if (job.company) {
+            if (typeof job.company === 'string' && job.company.trim()) return job.company.trim();
+            if (typeof job.company === 'object'){
+                if (typeof job.company.name === 'string' && job.company.name.trim()) return job.company.name.trim();
+                if (typeof job.company.fullName === 'string' && job.company.fullName.trim()) return job.company.fullName.trim();
+                if (typeof job.company.companyName === 'string' && job.company.companyName.trim()) return job.company.companyName.trim();
+            }
+        }
+        // fallback to any top-level company-like fields
+        return '';
+    };
+
+    // Normalize application status values from backend to display label and css class
+    const getAppStatusInfo = (rawStatus) => {
+        const s = (rawStatus || '').toString().toLowerCase();
+        // Map backend variants to canonical display label and CSS class
+        // backend may send 'reviewed' which we want to show as 'Shortlisted'
+        if (s === 'reviewed' || s === 'shortlisted') return { key: 'shortlisted', display: 'Shortlisted', css: 'shortlisted' };
+        if (s === 'pending' || s === 'applied' || s === '') return { key: 'pending', display: 'Pending', css: 'pending' };
+        if (s === 'accepted' || s === 'selected' || s === 'hired') return { key: 'selected', display: 'Selected', css: 'selected' };
+        if (s === 'rejected' || s === 'declined') return { key: 'rejected', display: 'Rejected', css: 'rejected' };
+        // fallback: capitalize first letter for display and use pending style
+        const display = rawStatus ? (String(rawStatus).charAt(0).toUpperCase() + String(rawStatus).slice(1)) : 'Pending';
+        return { key: s || 'pending', display, css: s || 'pending' };
+    };
+
+
+    const updateProfilePic = (profile) => {
+        const avatarPath = profile.avatar || (profile.profile && profile.profile.avatar);
+        const avatarUrl = makeFileUrl(avatarPath) || profilePicNav.src;
+        if (avatarUrl) profilePicNav.src = avatarUrl;
+    };
+
+    const createApplicationCardHTML = (app) => {
+        // Safely access nested job properties
+        const job = app.job || {};
+        const appliedDate = new Date(app.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        // job id may be in job._id, job.id, or app.jobId
+        const jobId = job && (job._id || job.id) ? (job._id || job.id) : (app.jobId || app.job);
+        const companyName = getJobCompanyName(job) || 'N/A';
+        const statusInfo = getAppStatusInfo(app.status);
+        const badgeClass = statusInfo.css || 'pending';
+        const badgeLabel = statusInfo.display || (app.status || 'Pending');
+        return `
+            <div class="application-card">
+                <div class="job-details">
+                    <h3><a href="#">${job.title || 'Job Title Not Available'}</a></h3>
+                    <div class="job-meta">
+                        <span>${companyName} &bull; ${job.location || 'N/A'}</span><br>
+                        <span>Applied: ${appliedDate}</span>
+                    </div>
+                </div>
+                <div class="application-status-actions">
+                    <span class="status-badge ${badgeClass}">${badgeLabel}</span>
+                    <a href="#" class="btn-primary view-job" data-jobid="${jobId || ''}">View Job</a>
+                </div>
+            </div>`;
+    };
+
+    // Fetch job details from backend by id
+    const fetchJobDetailsById = async (jobId) => {
+        if (!jobId) return null;
+        try {
+            const res = await fetchWithAuth(`/jobs/${encodeURIComponent(jobId)}`);
+            return (res && res.data) ? res.data : res;
+        } catch (err) {
+            console.error('Failed to fetch job details', err);
+            return null;
+        }
+    };
+
+    // Render a details panel element for a job
+    const buildJobDetailsElement = (job) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'inline-job-details';
+        wrap.style.borderTop = '1px solid var(--color-border)';
+        wrap.style.padding = '1rem';
+        wrap.style.background = 'var(--color-white)';
+
+        const title = document.createElement('h4');
+        title.textContent = job.title || job.jobTitle || 'Untitled';
+        title.style.marginBottom = '0.25rem';
+
+    const company = document.createElement('div');
+    company.style.color = 'var(--color-secondary)';
+    company.style.marginBottom = '0.5rem';
+    const companyName = getJobCompanyName(job) || (job.companyName || 'Company');
+    company.textContent = `${companyName} • ${job.location || job.city || 'Location not specified'}`;
+
+        const desc = document.createElement('p');
+        desc.style.marginTop = '0.5rem';
+        desc.textContent = job.description || job.jobDescription || job.summary || 'No description provided.';
+
+        // skills
+        const skills = document.createElement('div');
+        skills.style.marginTop = '0.5rem';
+        const s = job.skills || job.requiredSkills || job.skillsRequired || job.skillSet || '';
+        if (Array.isArray(s)) skills.textContent = 'Skills: ' + s.join(', ');
+        else if (typeof s === 'string' && s.trim()) skills.textContent = 'Skills: ' + s;
+
+        // experience
+        const exp = document.createElement('div');
+        exp.style.marginTop = '0.25rem';
+        const e = job.experience || job.experienceLevel || job.experienceRequired || job.experienceMin || '';
+        if (e || e === 0) exp.textContent = 'Experience: ' + String(e);
+
+        // salary
+        const sal = document.createElement('div');
+        sal.style.marginTop = '0.25rem';
+        const salaryRaw = job.salary || job.salaryRange || job.compensation || '';
+        if (salaryRaw || salaryRaw === 0) sal.textContent = 'Salary: ' + String(salaryRaw);
+
+        wrap.appendChild(title);
+        wrap.appendChild(company);
+        wrap.appendChild(desc);
+        if (skills.textContent) wrap.appendChild(skills);
+        if (exp.textContent) wrap.appendChild(exp);
+        if (sal.textContent) wrap.appendChild(sal);
+
+        return wrap;
+    };
+
+    // Toggle inline job details under a given application card element
+    const toggleJobDetailsUnderCard = async (cardEl, jobId) => {
+        if (!cardEl) return;
+        // If already present, remove it
+        const next = cardEl.nextElementSibling;
+        if (next && next.classList && next.classList.contains('inline-job-details-row')){
+            next.remove();
+            return;
+        }
+
+        // Insert placeholder row (div) after card
+        const detailsRow = document.createElement('div');
+        detailsRow.className = 'inline-job-details-row';
+        detailsRow.style.marginTop = '0.5rem';
+        detailsRow.appendChild(document.createTextNode('Loading job details...'));
+        cardEl.parentNode.insertBefore(detailsRow, cardEl.nextSibling);
+
+        // Fetch details
+        const job = await fetchJobDetailsById(jobId);
+        detailsRow.innerHTML = '';
+        if (!job) {
+            detailsRow.textContent = 'Failed to load job details.';
+            return;
+        }
+
+        const detailsEl = buildJobDetailsElement(job);
+        detailsEl.classList.add('job-details-panel');
+        detailsRow.appendChild(detailsEl);
+    };
+    
+    const renderFilteredApplications = () => {
+        // 1. Filter data based on current state (search term and status)
+        let filteredApps = allFetchedApplications;
+
+        if (currentStatusFilter !== 'All') {
+            // Map UI filter label to normalized key used by getAppStatusInfo
+            const targetKey = (currentStatusFilter || '').toString().toLowerCase();
+            filteredApps = filteredApps.filter(app => {
+                const statusInfo = getAppStatusInfo(app.status);
+                return statusInfo && statusInfo.key === targetKey;
+            });
+        }
+
+        if (currentSearchTerm) {
+            const searchTermLower = currentSearchTerm.toLowerCase();
+            filteredApps = filteredApps.filter(app => {
+                const job = app.job || {};
+                const title = (job.title || '').toString().toLowerCase();
+                const company = (getJobCompanyName(job) || '').toString().toLowerCase();
+                return title.includes(searchTermLower) || company.includes(searchTermLower);
+            });
+        }
+        
+        // 2. Paginate the filtered data
+        const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
+
+        // 3. Render the paginated items or empty state message
+        appListContainer.innerHTML = ''; 
+        if (paginatedApps.length === 0) {
+            const message = allFetchedApplications.length === 0 
+                ? "You have not applied for any jobs yet." 
+                : "No applications found matching your criteria.";
+            appListContainer.innerHTML = `<p class="placeholder-text">${message}</p>`;
+        } else {
+            appListContainer.innerHTML = paginatedApps.map(createApplicationCardHTML).join('');
+        }
+        
+        renderPagination(totalPages);
+    };
+
+    const renderPagination = (totalPages) => {
+        paginationContainer.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const createButton = (text, page, disabled = false) => {
+            const button = document.createElement('button');
+            button.innerHTML = text;
+            button.disabled = disabled;
+            button.addEventListener('click', () => {
+                currentPage = page;
+                renderFilteredApplications();
+            });
+            return button;
+        };
+
+        paginationContainer.appendChild(createButton('&laquo; Prev', currentPage - 1, currentPage === 1));
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageSpan = document.createElement('span');
+            pageSpan.textContent = i;
+            if (i === currentPage) pageSpan.classList.add('active');
+            pageSpan.addEventListener('click', () => {
+                currentPage = i;
+                renderFilteredApplications();
+            });
+            paginationContainer.appendChild(pageSpan);
+        }
+
+        paginationContainer.appendChild(createButton('Next &raquo;', currentPage + 1, currentPage === totalPages));
+    };
+
+    // === EVENT LISTENERS ===
+    
+    filterButtonsContainer.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            document.querySelector('.filter-btn.active').classList.remove('active');
+            e.target.classList.add('active');
+            currentStatusFilter = e.target.dataset.status;
+            currentPage = 1; // Reset to first page on new filter
+            renderFilteredApplications();
+        }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+        currentSearchTerm = e.target.value;
+        currentPage = 1; // Reset to first page on new search
+        renderFilteredApplications();
+    });
+    
+    // --- Mobile Menu Toggle ---
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navMenu = document.querySelector('.main-nav');
+    menuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        const icon = menuToggle.querySelector('i');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+    });
+
+    // --- INITIALIZATION ---
+    loadPage();
+    
+    // Delegate click for View Job buttons (toggle inline job details)
+    appListContainer.addEventListener('click', async (ev) => {
+        const btn = ev.target.closest('.view-job');
+        if (!btn) return;
+        ev.preventDefault();
+        // find the application card element (closest .application-card)
+        const card = btn.closest('.application-card');
+        const jobId = btn.getAttribute('data-jobid');
+        await toggleJobDetailsUnderCard(card, jobId);
+    });
+});
+</script>
+</body>
+</html>
+
+

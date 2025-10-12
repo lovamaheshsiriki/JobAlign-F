@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard - JobAlign</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+    
+    <style>
+        /* 1. Global Reset and Variables */
+        :root {
+            --color-primary: #2563EB; /* Blue */
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;   /* Dark Blue/Black for text */
+            --color-secondary: #64748B; /* Gray for body text */
+            --color-light: #F8FAFC;   /* Light gray for backgrounds */
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            --color-success: #22C55E;
+            --color-warning: #F59E0B;
+            --color-danger-text: #991B1B;
+            --color-danger-bg: #FEE2E2;
+            
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--color-light);
+            color: var(--color-secondary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* 2. Header / Navbar */
+        .header {
+            background-color: var(--color-white);
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1400px; margin: 0 auto;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem;
+            font-weight: 700; color: var(--color-dark); text-decoration: none;
+        }
+        .logo i { color: var(--color-primary); }
+        .main-nav ul { display: none; list-style: none; gap: 2rem; }
+        .main-nav a {
+            font-weight: 500; color: var(--color-secondary); transition: var(--transition-fast);
+            text-decoration: none; padding-bottom: 0.5rem;
+        }
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--color-primary); border-bottom: 2px solid var(--color-primary);
+        }
+        .profile-icon img { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .menu-toggle { display: block; font-size: 1.5rem; cursor: pointer; background: none; border: none; color: var(--color-dark); }
+        
+        /* ✅ START: ADDED FOR MOBILE MENU */
+        .main-nav ul.active {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--color-white);
+            width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            gap: 1rem;
+            z-index: 1001;
+        }
+        /* ✅ END: ADDED FOR MOBILE MENU */
+        
+        @media (min-width: 992px) {
+            .main-nav ul { display: flex; }
+            .menu-toggle { display: none; }
+        }
+
+        /* 3. Main Dashboard Layout & Cards */
+        .card {
+            background-color: var(--color-white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition-fast);
+        }
+        .card:hover { transform: translateY(-3px); }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem;
+        }
+        .card-header h2 { font-size: 1.25rem; color: var(--color-dark); }
+        
+        .btn {
+            padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600;
+            cursor: pointer; transition: var(--transition-fast); border: 1px solid transparent;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-primary { background-color: var(--color-primary); color: var(--color-white); }
+        .btn-primary:hover { background-color: #1D4ED8; }
+
+        /* 4. Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--color-primary), #60A5FA);
+            color: var(--color-white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+        }
+        .welcome-banner h1 { font-size: 2rem; }
+        .welcome-banner p { opacity: 0.9; }
+
+        /* 5. Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .stat-card .icon {
+            font-size: 1.75rem;
+            color: var(--color-primary);
+            background-color: var(--color-primary-light);
+            width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--color-dark); }
+        .stat-card .label { font-size: 0.9rem; }
+
+        /* 6. Recent Jobs & Applicants Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 992px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+        }
+        
+        /* 7. Table Styles */
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td { padding: 1rem 0.75rem; border-bottom: 1px solid var(--color-border); }
+        th { font-weight: 600; color: var(--color-dark); }
+        td .applicant-info { display: flex; align-items: center; gap: 0.75rem; }
+        td .applicant-info img { width: 40px; height: 40px; border-radius: 50%; }
+        td h3 { font-size: 1rem; color: var(--color-dark); margin: 0; }
+        td p { font-size: 0.9rem; margin: 0; }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem; border-radius: 999px;
+            font-weight: 600; font-size: 0.8rem;
+        }
+        .status-active { background-color: var(--color-success); color: var(--color-white); }
+        .status-closed { background-color: var(--color-danger-bg); color: var(--color-danger-text); }
+        .status-pending, .status-shortlisted { background-color: var(--color-warning); color: var(--color-white); }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar">
+            <a href="../index.html" class="logo"><i class="fa-solid fa-check-double"></i><span>JobAlign</span></a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="jobposts.html">Job Posts</a></li>
+                    <li><a href="applicants.html">Applicants</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="settings.html">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="profile-icon"><a href="profile.html"><img id="nav-company-logo" src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="Profile" onerror="this.onerror=null;this.src='https://placehold.co/40x40/E2E8F0/475569?text=U'"></a></div>
+            <button class="menu-toggle" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="welcome-banner">
+            <h1>Welcome back, Tech Solutions Inc.</h1>
+            <p>Here's a summary of your recruitment activity.</p>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+            </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Job Posts</h2>
+                    <a href="jobposts.html" class="btn btn-primary">View All</a>
+                </div>
+                <div class="table-wrapper">
+                    <table id="recent-jobs-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Date Posted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Applicants</h2>
+                    <a href="applicants.html" class="btn btn-primary">View All</a>
+                </div>
+                 <div class="table-wrapper">
+                    <table id="recent-applicants-table">
+                        <thead>
+                            <tr>
+                                <th>Applicant</th>
+                                <th>Applied For</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        /*
+         Recruiter Dashboard - Dynamic frontend integration
+         - Fetches recruiter profile, jobs and applicants from backend
+         - Uses JWT stored in localStorage (key: 'token')
+         - Decodes token to extract employerId (simple base64 decode of payload)
+         - Modular functions: fetchProfile, fetchJobs, fetchApplicants, render functions
+        */
+
+        (function () {
+            // --- Configuration ---
+            const API_BASE = 'http://localhost:5000/api';
+            const TOKEN_KEY = 'token';
+            const LOGIN_PAGE = 'loginforrecruiter.html';
+
+            // --- DOM Elements ---
+            const welcomeBanner = document.querySelector('.welcome-banner');
+            const statsGrid = document.getElementById('stats-grid');
+            const jobsTableBody = document.querySelector('#recent-jobs-table tbody');
+            const applicantsTableBody = document.querySelector('#recent-applicants-table tbody');
+
+            // --- Small helpers ---
+            const byId = id => document.getElementById(id);
+            const showLoadingCard = (container, message = 'Loading...') => container.innerHTML = `<div class="card"><p>${message}</p></div>`;
+            const showEmptyCard = (container, message = 'No data available') => container.innerHTML = `<div class="card"><p>${message}</p></div>`;
+
+            // Decode JWT payload without verification to get employer id. Returns payload object or null
+            function decodeJwt(token) {
+                try {
+                    const payload = token.split('.')[1];
+                    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+                    return decoded;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            // Fetch helper with auth
+            async function fetchWithAuth(url, opts = {}) {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (!token) throw new Error('No token');
+                const hdrs = Object.assign({ 'Authorization': `Bearer ${token}` }, opts.headers || {});
+                const res = await fetch(url, Object.assign({}, opts, { headers: hdrs }));
+                if (res.status === 401 || res.status === 403) throw new Error('Unauthorized');
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) return res.json();
+                return res.text();
+            }
+
+            // --- API calls ---
+            async function fetchProfile(/*employerId not required - token-based route */) {
+                // GET /api/employer/profile (token-based, backend returns authenticated employer)
+                return fetchWithAuth(`${API_BASE}/employer/profile`);
+            }
+
+            async function fetchJobs(/*employerId not required - backend exposes all jobs at /api/jobs */) {
+                // GET /api/jobs (returns all jobs). We'll filter client-side for this employer.
+                return fetchWithAuth(`${API_BASE}/jobs`);
+            }
+
+            async function fetchApplicants(employerId) {
+                // GET /api/applications/employer/:id
+                return fetchWithAuth(`${API_BASE}/applications/employer/${employerId}`);
+            }
+
+            // --- Renderers ---
+            function renderWelcome(profile) {
+                const company = profile.companyName || 'Your Company';
+                const fullName = profile.fullName || profile.name || '';
+                welcomeBanner.innerHTML = `
+                    <h1>Welcome back, ${company}</h1>
+                    <p>${fullName ? `Recruiter: ${fullName}` : "Here's a summary of your recruitment activity."}</p>
+                `;
+            }
+
+            function renderStats(stats) {
+                // stats: { totalJobs, activeJobs, totalApplicants, shortlisted }
+                if (!stats) return showEmptyCard(statsGrid, 'No stats available');
+                statsGrid.innerHTML = '';
+                const statItems = [
+                    { id: 'total-jobs', label: 'Total Jobs Posted', value: stats.totalJobs || 0, icon: 'fa-briefcase' },
+                    { id: 'active-jobs', label: 'Active Jobs', value: stats.activeJobs || 0, icon: 'fa-bullhorn' },
+                    { id: 'total-applicants', label: 'Total Applicants', value: stats.totalApplicants || 0, icon: 'fa-users' },
+                    { id: 'shortlisted', label: 'Shortlisted', value: stats.shortlisted || 0, icon: 'fa-user-check' },
+                ];
+                statsGrid.innerHTML = statItems.map(stat => `
+                    <div class="stat-card card" id="${stat.id}">
+                        <div class="icon"><i class="fas ${stat.icon}"></i></div>
+                        <div class="info">
+                            <span class="value">${stat.value}</span>
+                            <p class="label">${stat.label}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function renderJobs(jobs) {
+                if (!jobs || jobs.length === 0) {
+                    jobsTableBody.innerHTML = `<tr><td colspan="3">No jobs posted yet.</td></tr>`;
+                    return;
+                }
+                jobsTableBody.innerHTML = jobs.map(job => `
+                    <tr>
+                        <td><h3>${escapeHtml(job.title || job.jobTitle || 'Untitled')}</h3></td>
+                        <td>${new Date(job.createdAt || job.datePosted || Date.now()).toLocaleDateString()}</td>
+                        <td><span class="status-badge ${job.status === 'Active' ? 'status-active' : (job.status === 'Closed' ? 'status-closed' : 'status-pending')}">${escapeHtml(job.status || 'Unknown')}</span></td>
+                    </tr>
+                `).join('');
+            }
+
+            function renderApplicants(applications) {
+                // Only render actual application records returned by the backend
+                if (!applications || applications.length === 0) {
+                    applicantsTableBody.innerHTML = `<tr><td colspan="3">No applicants available.</td></tr>`;
+                    return;
+                }
+
+                // Filter out any entries that are not real application objects or missing applicant
+                const realApps = applications.filter(a => a && (a.applicant || a.applicantId || a.applicantName || a.applicantId === 0));
+
+                if (realApps.length === 0) {
+                    applicantsTableBody.innerHTML = `<tr><td colspan="3">No applicants available.</td></tr>`;
+                    return;
+                }
+
+                const PLACEHOLDER = 'https://placehold.co/40x40/E2E8F0/475569?text=U';
+                const IMG_BASE = 'http://localhost:5000';
+
+                applicantsTableBody.innerHTML = realApps.map(app => {
+                    // Pull applicant object (populated) if present
+                    const applicant = app.applicant || (app.applicantId ? { _id: app.applicantId } : null);
+
+                    // Name: prefer populated applicant.fullName or applicant.name, then fallback to flattened fields
+                    const name = (applicant && (applicant.fullName || applicant.name)) || app.applicantName || app.name || 'Applicant';
+
+                    // Avatar: prefer flattened fields provided by backend on the application object
+                    let avatar = PLACEHOLDER;
+                    try {
+                        if (app.applicantProfilePic) {
+                            avatar = app.applicantProfilePic;
+                        } else if (app.profilePic) {
+                            avatar = app.profilePic;
+                        } else if (applicant) {
+                            if (applicant.profile && applicant.profile.profilePic) avatar = applicant.profile.profilePic;
+                            else if (applicant.profile && applicant.profile.profileImage) avatar = applicant.profile.profileImage;
+                            else if (applicant.profile && applicant.profile.avatar) avatar = applicant.profile.avatar;
+                            else if (applicant.profilePic) avatar = applicant.profilePic;
+                            else if (applicant.profileImage) avatar = applicant.profileImage;
+                            else if (applicant.avatar) avatar = applicant.avatar;
+                        }
+                        if ((!avatar || avatar === 'null') && (app.applicantAvatar || app.avatar)) {
+                            avatar = app.applicantAvatar || app.avatar;
+                        }
+                    } catch (e) {
+                        avatar = PLACEHOLDER;
+                    }
+
+                    // Resolve relative urls
+                    try {
+                        if (avatar && typeof avatar === 'string') {
+                            if (!avatar || avatar === 'null') avatar = PLACEHOLDER;
+                            else if (avatar.startsWith('/')) avatar = IMG_BASE.replace(/\/$/, '') + avatar;
+                            else if (!/^https?:\/\//i.test(avatar)) avatar = IMG_BASE.replace(/\/$/, '') + '/' + avatar.replace(/^\//, '');
+                        }
+                    } catch (e) { /* ignore */ }
+
+                    const jobTitle = (app.job && (app.job.title || app.job.jobTitle)) || app.jobTitle || app.title || 'Unknown';
+                    // Map backend status values to display label and class
+                    const rawStatus = (app.status || '').toString().toLowerCase();
+                    let displayStatus = (rawStatus && rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1)) || 'Unknown';
+                    if (rawStatus === 'reviewed') displayStatus = 'Shortlisted';
+                    else if (rawStatus === 'accepted') displayStatus = 'Accepted';
+                    else if (rawStatus === 'pending') displayStatus = 'Pending';
+                    else if (rawStatus === 'rejected') displayStatus = 'Rejected';
+
+                    const statusClass = (rawStatus === 'reviewed' || rawStatus === 'shortlisted') ? 'status-shortlisted'
+                        : (rawStatus === 'pending') ? 'status-pending'
+                        : (rawStatus === 'accepted') ? 'status-active'
+                        : 'status-closed';
+
+                    return `
+                    <tr>
+                        <td>
+                            <div class="applicant-info">
+                                <img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+                                <div><h3>${escapeHtml(name)}</h3></div>
+                            </div>
+                        </td>
+                        <td>${escapeHtml(jobTitle)}</td>
+                        <td><span class="status-badge ${statusClass}">${escapeHtml(displayStatus || 'Unknown')}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            // Simple HTML escaper
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"]+/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s] || s));
+            }
+
+            // Normalize typical API list responses into an array
+            function normalizeListResponse(res) {
+                if (!res) return [];
+                if (Array.isArray(res)) return res;
+                if (res.success && Array.isArray(res.data)) return res.data;
+                if (res.data && Array.isArray(res.data)) return res.data;
+                console.warn('Unexpected list response shape:', res);
+                return [];
+            }
+
+            // Auto-refresh support: periodically re-fetch jobs and applicants to keep dashboard near real-time
+            let _refreshTimer = null;
+            const REFRESH_INTERVAL_MS = 30000; // 30 seconds
+
+            function stopAutoRefresh() {
+                if (_refreshTimer) {
+                    clearInterval(_refreshTimer);
+                    _refreshTimer = null;
+                }
+            }
+
+            function startAutoRefresh(employerId) {
+                stopAutoRefresh();
+                _refreshTimer = setInterval(async () => {
+                    try {
+                        const [jobsRes, appsRes] = await Promise.all([fetchJobs(employerId), fetchApplicants(employerId)]);
+                        const jobs = normalizeListResponse(jobsRes);
+                        const applications = normalizeListResponse(appsRes);
+
+                        // Recalculate stats
+                            const stats = {
+                                totalJobs: (jobs && jobs.length) || 0,
+                                activeJobs: (jobs && jobs.filter(j => (j.status || j.jobStatus || '').toLowerCase() === 'active').length) || 0,
+                                totalApplicants: (applications && applications.length) || 0,
+                                // Treat backend 'reviewed' as shortlisted for display/aggregation
+                                shortlisted: (applications && applications.filter(a => {
+                                    const s = (a.status || '').toString().toLowerCase();
+                                    return s === 'shortlisted' || s === 'reviewed';
+                                }).length) || 0,
+                            };
+
+                        renderStats(stats);
+                        renderJobs(jobs || []);
+                        renderApplicants(applications || []);
+                    } catch (err) {
+                        console.warn('Auto-refresh failed', err);
+                    }
+                }, REFRESH_INTERVAL_MS);
+            }
+
+            // --- Main flow ---
+            async function init() {
+                // 1. Check token
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (!token) return redirectToLogin();
+
+                const payload = decodeJwt(token);
+                if (!payload || !payload.id) return redirectToLogin();
+                const employerId = payload.id;
+
+                // Show loading states
+                showLoadingCard(statsGrid, 'Loading stats...');
+                jobsTableBody.innerHTML = `<tr><td colspan="3">Loading jobs...</td></tr>`;
+                applicantsTableBody.innerHTML = `<tr><td colspan="3">Loading applicants...</td></tr>`;
+
+                try {
+                    const [profileRes, jobsRes, appsRes] = await Promise.all([
+                        fetchProfile(employerId),
+                        fetchJobs(employerId),
+                        fetchApplicants(employerId)
+                    ]);
+
+                    // Expecting backend to wrap responses: { success, data }
+                    const profile = (profileRes && profileRes.success) ? profileRes.data : profileRes;
+                    // Update navbar company logo if available
+                    try {
+                        const navImg = document.getElementById('nav-company-logo');
+                        if (navImg) {
+                            let logo = (profile && profile.companyDetails && profile.companyDetails.companyLogo) || profile.profilePic || null;
+                            const LOGO_PLACEHOLDER = 'https://placehold.co/40x40/E2E8F0/475569?text=C';
+                            if (logo && typeof logo === 'string') {
+                                if (logo.startsWith('/')) logo = IMG_BASE.replace(/\/$/, '') + logo;
+                                else if (!/^https?:\/\//i.test(logo)) logo = IMG_BASE.replace(/\/$/, '') + '/' + logo.replace(/^\//, '');
+                            } else {
+                                logo = LOGO_PLACEHOLDER;
+                            }
+                            navImg.src = logo;
+                            navImg.onerror = function () { this.onerror = null; this.src = LOGO_PLACEHOLDER; };
+                        }
+                    } catch (e) { /* ignore */ }
+                    // Normalize responses to arrays where appropriate
+                    const allJobs = normalizeListResponse(jobsRes);
+                    const allApplications = normalizeListResponse(appsRes);
+
+                    // Filter jobs that belong to this employer (job.company may be id or object)
+                    const jobs = (allJobs || []).filter(j => {
+                        const company = j && j.company;
+                        const companyId = company && (company._id || company);
+                        return companyId && String(companyId) === String(employerId);
+                    });
+
+                    // Filter applications to those for employer's jobs (applications likely populated with job)
+                    const applications = (allApplications || []).filter(a => {
+                        // application.job may be id or object with _id
+                        const job = a && a.job;
+                        const jobId = job && (job._id || job);
+                        // If job object exists, we could check ownership via job.company if populated; fall back to include and let employer endpoint on backend handle security
+                        return true; // keep all applications returned by the endpoint; normalizeListResponse will have already been used for the employer route
+                    });
+
+                    renderWelcome(profile || {});
+
+                    // Aggregate stats
+                    const stats = {
+                        totalJobs: (jobs && jobs.length) || 0,
+                        activeJobs: (jobs && jobs.filter(j => (j.status || j.jobStatus || '').toLowerCase() === 'active').length) || 0,
+                        totalApplicants: (applications && applications.length) || 0,
+                        shortlisted: (applications && applications.filter(a => (a.status || '').toLowerCase() === 'shortlisted').length) || 0,
+                    };
+
+                    renderStats(stats);
+                    renderJobs(jobs || []);
+                    renderApplicants(applications || []);
+
+                } catch (err) {
+                    console.error('Dashboard load failed', err);
+                    // If unauthorized, redirect
+                    if (err.message && err.message.toLowerCase().includes('unauthorized')) {
+                        return redirectToLogin();
+                    }
+                    // Show errors in the UI
+                    showEmptyCard(statsGrid, 'Unable to load dashboard.');
+                    jobsTableBody.innerHTML = `<tr><td colspan="3">Unable to load jobs.</td></tr>`;
+                    applicantsTableBody.innerHTML = `<tr><td colspan="3">Unable to load applicants.</td></tr>`;
+                }
+            }
+
+            function redirectToLogin() {
+                window.location.href = LOGIN_PAGE;
+            }
+
+            // Run init on DOM ready
+            document.addEventListener('DOMContentLoaded', init);
+
+            // Expose some functions for debugging (optional)
+            window._recruiterDashboard = { fetchProfile, fetchJobs, fetchApplicants, renderStats, renderJobs, renderApplicants };
+
+        })();
+
+        // --- ✅ START: ADDED MOBILE MENU TOGGLE SCRIPT ---
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.main-nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+
+        document.querySelectorAll('.main-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Only remove active class if the menu is actually open
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-xmark');
+                }
+            });
+        });
+        // --- ✅ END: ADDED MOBILE MENU TOGGLE SCRIPT ---
+    </script>
+</body>
+</html>

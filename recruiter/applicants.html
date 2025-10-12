@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants - JobAlign</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../data/font/fontawesome-free-7.1.0-web/css/all.min.css">
+    <style>
+        /* 1. Global Reset and Variables */
+        :root {
+            --color-primary: #2563EB; /* Blue */
+            --color-primary-light: #EFF6FF;
+            --color-dark: #0F172A;   /* Dark Blue/Black for text */
+            --color-secondary: #64748B; /* Gray for body text */
+            --color-light: #F8FAFC;   /* Light gray for backgrounds */
+            --color-white: #FFFFFF;
+            --color-border: #E2E8F0;
+            
+            /* Status Colors */
+            --color-pending-bg: #FEF3C7; --color-pending-text: #B45309;
+            --color-shortlisted-bg: #D1FAE5; --color-shortlisted-text: #065F46;
+            --color-rejected-bg: #FEE2E2; --color-rejected-text: #991B1B;
+            
+            --font-family-sans: 'Inter', sans-serif;
+            --border-radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --transition-fast: 0.2s ease-in-out;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family-sans); background-color: var(--color-light);
+            color: var(--color-secondary); line-height: 1.6;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* 2. Header / Navbar */
+        .header {
+            background-color: var(--color-white); padding: 1rem 1.5rem;
+            box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000;
+        }
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1400px; margin: 0 auto;
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem;
+            font-weight: 700; color: var(--color-dark); text-decoration: none;
+        }
+        .logo i { color: var(--color-primary); }
+        .main-nav ul { display: none; list-style: none; gap: 2rem; }
+        .main-nav a {
+            font-weight: 500; color: var(--color-secondary); transition: var(--transition-fast);
+            text-decoration: none; padding-bottom: 0.5rem;
+        }
+        .main-nav a:hover, .main-nav a.active {
+            color: var(--color-primary); border-bottom: 2px solid var(--color-primary);
+        }
+        .profile-icon img { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .menu-toggle { display: block; font-size: 1.5rem; cursor: pointer; background: none; border: none; color: var(--color-dark); }
+
+        /* ✅ START: ADDED FOR MOBILE MENU */
+        .main-nav ul.active {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: var(--color-white);
+            width: 200px;
+            box-shadow: var(--shadow);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            gap: 1rem;
+            z-index: 1001;
+        }
+        /* ✅ END: ADDED FOR MOBILE MENU */
+
+        @media (min-width: 992px) {
+            .main-nav ul { display: flex; }
+            .menu-toggle { display: none; }
+        }
+
+        /* 3. Main Layout & Card */
+        .card {
+            background-color: var(--color-white); padding: 1.5rem;
+            border-radius: var(--border-radius); box-shadow: var(--shadow);
+        }
+        .card-header {
+            padding-bottom: 1rem; margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .card-header h1 { color: var(--color-dark); }
+        
+        /* 4. Filters */
+        .filters-bar {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .filters-bar { grid-template-columns: 2fr 1fr 1fr; }
+        }
+        .search-bar { position: relative; }
+        .search-bar input, .filters-bar select {
+            width: 100%; padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border); border-radius: 0.5rem; font-size: 1rem;
+        }
+        .search-bar i {
+            position: absolute; left: 1rem; top: 50%;
+            transform: translateY(-50%); color: var(--color-secondary);
+        }
+        .search-bar input { padding-left: 2.5rem; }
+
+        /* 5. Applicants Table */
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%; border-collapse: collapse; text-align: left;
+        }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--color-border); }
+        th { font-weight: 600; color: var(--color-dark); white-space: nowrap; }
+        tbody tr { transition: var(--transition-fast); }
+        tbody tr:hover { background-color: var(--color-light); }
+        
+        .applicant-info { display: flex; align-items: center; gap: 0.75rem; }
+        .applicant-info img { width: 40px; height: 40px; border-radius: 50%; }
+        .applicant-name {
+            font-weight: 600; color: var(--color-dark);
+            text-decoration: none; cursor: pointer;
+        }
+        .applicant-name:hover { color: var(--color-primary); }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem; border-radius: 999px;
+            font-weight: 600; font-size: 0.8rem;
+        }
+        .status-badge.Pending { background-color: var(--color-pending-bg); color: var(--color-pending-text); }
+        .status-badge.Shortlisted { background-color: var(--color-shortlisted-bg); color: var(--color-shortlisted-text); }
+        .status-badge.Rejected { background-color: var(--color-rejected-bg); color: var(--color-rejected-text); }
+    .status-badge.Accepted { background-color: #16A34A; color: #fff; }
+        
+        .action-buttons { display: flex; gap: 0.5rem; }
+        .btn-action {
+            background: none; border: 1px solid var(--color-border);
+            border-radius: 0.5rem; padding: 0.5rem 1rem; cursor: pointer;
+            transition: var(--transition-fast); font-weight: 500;
+        }
+        .btn-action:hover { border-color: var(--color-primary); color: var(--color-primary); }
+        
+        .no-results { text-align: center; padding: 2rem; }
+
+        /* 6. Profile Modal */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe; margin: auto; border: 1px solid #888;
+            width: 90%; max-width: 700px; border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .modal-header {
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--color-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-header h2 { color: var(--color-dark); }
+        .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-body { padding: 1.5rem; }
+        .profile-summary { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .profile-summary img { width: 80px; height: 80px; border-radius: 50%; }
+        .profile-section { margin-bottom: 1.5rem; }
+        .profile-section h3 { color: var(--color-dark); margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="navbar">
+            <a href="recruiter-dashboard.html" class="logo"><i class="fa-solid fa-check-double"></i><span>JobAlign</span></a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="recruiter-dashboard.html">Dashboard</a></li>
+                    <li><a href="jobposts.html">Job Posts</a></li>
+                    <li><a href="#" class="active">Applicants</a></li>
+                    <li><a href="profile.html">Profile</a></li>
+                    <li><a href="settings.html">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="profile-icon"><a href="profile.html"><img src="https://placehold.co/40x40/E2E8F0/475569?text=U" alt="Profile"></a></div>
+            <button class="menu-toggle" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1>Applicants Management</h1>
+            </div>
+            
+            <div class="filters-bar">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by applicant name...">
+                </div>
+                <select id="job-filter">
+                    <option value="All">All Jobs</option>
+                    </select>
+                <select id="status-filter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Shortlisted">Shortlisted</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Applicant Name</th>
+                            <th>Job Applied For</th>
+                            <th>Application Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applicants-tbody">
+                        </tbody>
+                </table>
+            </div>
+             <div id="no-results" class="no-results" style="display: none;">
+                <p>No applicants found matching your criteria.</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-applicant-name">Applicant Profile</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="profile-summary">
+                    <img id="modal-avatar" src="" alt="Applicant Avatar">
+                    <div>
+                        <h2 id="modal-name-title"></h2>
+                        <p id="modal-job-applied"></p>
+                    </div>
+                </div>
+                <div class="profile-section">
+                    <h3>Skills</h3>
+                    <p id="modal-skills"></p>
+                </div>
+                <div class="profile-section">
+                    <h3>Experience</h3>
+                    <p id="modal-experience"></p>
+                </div>
+                <div class="profile-section">
+                    <h3>Education</h3>
+                    <p id="modal-education"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        /* Applicants page - integrate with backend
+           - Fetch applications for employer: GET /api/applications/employer/:employerId
+           - Update status: PUT /api/applications/:applicationId/status
+           - Fetch user details: GET /api/users/:applicantId
+        */
+        (function () {
+            const API_BASE = 'http://localhost:5000/api';
+            const TOKEN_KEY = 'token';
+            const LOGIN_PAGE = 'recruiter-login.html';
+
+            // Derive backend host from API_BASE (e.g. http://localhost:5000)
+            const backendHost = (function () {
+                try {
+                    const m = API_BASE.match(/^(https?:\/\/[^\/]+)(?:\/api(?:\/.*)?)?$/);
+                    return (m && m[1]) ? m[1] : API_BASE.replace(/\/api\/.*$/, '');
+                } catch (e) { return API_BASE.replace(/\/api\/.*$/, ''); }
+            })();
+
+            // Navbar profile image
+            const navProfileImg = document.querySelector('.profile-icon img');
+
+            // Helper to normalize URLs returned from backend
+            function normalizeUrl(url) {
+                if (!url) return 'https://placehold.co/40x40/E2E8F0/475569?text=NA';
+                if (typeof url !== 'string') return 'https://placehold.co/40x40/E2E8F0/475569?text=NA';
+                if (url.startsWith('http')) return url;
+                if (url.startsWith('/uploads')) return backendHost + url;
+                // handle Windows-style backslashes or relative paths
+                if (url.indexOf('\\') !== -1) return url.replace(/\\/g, '/');
+                return url;
+            }
+
+            // DOM
+            const tbody = document.getElementById('applicants-tbody');
+            const searchInput = document.getElementById('search-input');
+            const jobFilter = document.getElementById('job-filter');
+            const statusFilter = document.getElementById('status-filter');
+            const noResultsEl = document.getElementById('no-results');
+            const modal = document.getElementById('profile-modal');
+            const closeBtn = document.querySelector('.modal .close-btn');
+            const modalAvatar = document.getElementById('modal-avatar');
+            const modalNameTitle = document.getElementById('modal-name-title');
+            const modalJobApplied = document.getElementById('modal-job-applied');
+            const modalSkills = document.getElementById('modal-skills');
+            const modalExperience = document.getElementById('modal-experience');
+            const modalEducation = document.getElementById('modal-education');
+            const modalApplicantName = document.getElementById('modal-applicant-name');
+
+            // State
+            let allApplicants = []; // will be fetched from backend
+            let jobsList = []; // distinct job titles for filter
+            let filters = { search: '', job: 'All', status: 'All' };
+
+            // Small helpers
+            function decodeToken(token) {
+                try {
+                    const payload = token.split('.')[1];
+                    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+                } catch (e) { return null; }
+            }
+
+            function ensureAuth() {
+                const token = localStorage.getItem(TOKEN_KEY);
+                if (!token) { window.location.href = LOGIN_PAGE; return null; }
+                const payload = decodeToken(token);
+                if (!payload) { localStorage.removeItem(TOKEN_KEY); window.location.href = LOGIN_PAGE; return null; }
+                if (payload.exp && Date.now() >= payload.exp * 1000) { localStorage.removeItem(TOKEN_KEY); window.location.href = LOGIN_PAGE; return null; }
+                return { token, payload };
+            }
+
+            async function fetchApplications(employerId, token) {
+                const res = await fetch(`${API_BASE}/applications/employer/${employerId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error(`Failed to fetch applications (${res.status})`);
+                return res.json();
+            }
+
+            async function fetchUser(applicantId, token) {
+                const res = await fetch(`${API_BASE}/users/${applicantId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (!res.ok) throw new Error('Failed to fetch applicant details');
+                return res.json();
+            }
+
+            async function updateApplicationStatus(applicationId, newStatus, token) {
+                const res = await fetch(`${API_BASE}/applications/${applicationId}/status`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (!res.ok) {
+                    const ct = res.headers.get('content-type') || '';
+                    let body = await res.text();
+                    if (ct.includes('application/json')) body = JSON.parse(body);
+                    throw new Error((body && body.message) ? body.message : `Status update failed (${res.status})`);
+                }
+                return res.json();
+            }
+
+            // Renderers
+            function renderJobFilter() {
+                // Clear and populate jobs
+                jobFilter.innerHTML = '<option value="All">All Jobs</option>';
+                jobsList.forEach(j => {
+                    const opt = document.createElement('option'); opt.value = j; opt.textContent = j; jobFilter.appendChild(opt);
+                });
+            }
+
+            function renderApplicants() {
+                // Filter
+                const list = allApplicants.filter(a => {
+                    const nameMatch = a.name && a.name.toLowerCase().includes(filters.search.toLowerCase());
+                    const jobMatch = filters.job === 'All' || (a.jobTitle === filters.job);
+                    const statusMatch = filters.status === 'All' || (a.status === filters.status);
+                    return nameMatch && jobMatch && statusMatch;
+                });
+
+                tbody.innerHTML = '';
+                noResultsEl.style.display = list.length === 0 ? 'block' : 'none';
+
+                list.forEach(app => {
+                    const tr = document.createElement('tr');
+                    // Normalize avatar URL and fallback to placeholder
+                    const avatar = normalizeUrl(app.profilePic) || 'https://placehold.co/40x40/E2E8F0/475569?text=NA';
+                    const appliedOn = app.appliedOn ? new Date(app.appliedOn).toLocaleDateString() : '';
+                    tr.innerHTML = `
+                        <td>
+                            <div class="applicant-info">
+                                <img src="${avatar}" alt="${app.name}">
+                                <a href="#" class="applicant-name" data-id="${app.applicationId}">${app.name}</a>
+                            </div>
+                        </td>
+                        <td>${app.jobTitle || ''}</td>
+                        <td>${appliedOn}</td>
+                        <td><span class="status-badge ${app.status}">${app.status}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action" data-action="shortlist" data-id="${app.applicationId}">Shortlist</button>
+                                <button class="btn-action" data-action="accept" data-id="${app.applicationId}">Accept</button>
+                                <button class="btn-action" data-action="reject" data-id="${app.applicationId}">Reject</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Show loading state
+            function showLoading() {
+                tbody.innerHTML = '<tr><td colspan="5">Loading applicants...</td></tr>';
+                noResultsEl.style.display = 'none';
+            }
+
+            function showError(message) {
+                tbody.innerHTML = `<tr><td colspan="5" style="color:#991B1B;">${message}</td></tr>`;
+                noResultsEl.style.display = 'none';
+            }
+
+            // Handlers
+            searchInput.addEventListener('input', (e) => { filters.search = e.target.value; renderApplicants(); });
+            jobFilter.addEventListener('change', (e) => { filters.job = e.target.value; renderApplicants(); });
+            statusFilter.addEventListener('change', (e) => { filters.status = e.target.value; renderApplicants(); });
+
+            tbody.addEventListener('click', async (e) => {
+                const btn = e.target.closest('button');
+                const link = e.target.closest('.applicant-name');
+                const auth = ensureAuth(); if (!auth) return;
+
+                    if (btn) {
+                    const action = btn.dataset.action; const appId = btn.dataset.id;
+                    if (!action || !appId) return;
+                    // Map UI actions to backend-allowed status values
+                    // Backend accepts: 'pending', 'reviewed', 'rejected', 'accepted'
+                    let newStatus;
+                    // Map UI action -> backend status
+                    if (action === 'shortlist') newStatus = 'reviewed'; // backend uses 'reviewed' -> we'll display as 'Shortlisted'
+                    else if (action === 'accept') newStatus = 'accepted';
+                    else if (action === 'reject') newStatus = 'rejected';
+                    else newStatus = 'pending';
+                    try {
+                        await updateApplicationStatus(appId, newStatus, auth.token);
+                        // Refresh list
+                        await loadApplicants();
+                    } catch (err) {
+                        alert(err.message || 'Failed to update status');
+                    }
+                } else if (link) {
+                    e.preventDefault();
+                    const applicationId = link.dataset.id || link.dataset.id;
+                    // find application object by applicationId
+                    const app = allApplicants.find(a => a.applicationId == link.dataset.id);
+                    if (!app) return;
+                    // Fetch detailed user info and show modal
+                    try {
+                        const auth = ensureAuth(); if (!auth) return;
+                        const userRes = await fetchUser(app.applicantId, auth.token);
+                        const user = (userRes && userRes.success) ? userRes.data : userRes;
+                        openProfileModal(user, app.jobTitle);
+                    } catch (err) {
+                        alert('Failed to load profile');
+                    }
+                }
+            });
+
+            function formatExperience(expArr) {
+                if (!Array.isArray(expArr) || expArr.length === 0) return 'No experience listed.';
+                return expArr.map(e => {
+                    const company = e.company || e.organization || e.employer || '';
+                    const title = e.title || e.role || e.position || '';
+                    const from = e.from ? new Date(e.from).toLocaleDateString() : (e.startDate || '');
+                    const to = e.to ? new Date(e.to).toLocaleDateString() : (e.endDate || 'Present');
+                    return `${title}${title && company ? ' at ' : ''}${company} — ${from} to ${to}`.trim();
+                }).join('\n');
+            }
+
+            function formatEducation(edArr) {
+                if (!Array.isArray(edArr) || edArr.length === 0) return 'No education listed.';
+                return edArr.map(e => {
+                    const degree = e.degree || e.course || e.qualification || '';
+                    const inst = e.institution || e.school || e.college || '';
+                    const year = e.year || e.graduationYear || e.endYear || '';
+                    return `${degree}${degree && inst ? ', ' : ''}${inst}${year ? ' — ' + year : ''}`.trim();
+                }).join('\n');
+            }
+
+            function openProfileModal(user, jobTitle) {
+                modalApplicantName.textContent = `${user.name || 'Applicant'}'s Profile`;
+                const avatarUrl = normalizeUrl(user.profile && user.profile.avatar);
+                modalAvatar.src = avatarUrl;
+                modalNameTitle.textContent = user.name || '';
+                modalJobApplied.textContent = jobTitle ? `Applied for: ${jobTitle}` : '';
+                modalSkills.textContent = (user.profile && user.profile.skills) ? (user.profile.skills.join(', ') || 'No skills listed.') : 'No skills listed.';
+
+                // Format experience and education
+                modalExperience.textContent = formatExperience(user.profile && user.profile.experience);
+                modalEducation.textContent = formatEducation(user.profile && user.profile.education);
+
+                // Resume link
+                const resumeUrl = normalizeUrl(user.profile && user.profile.resumeUrl);
+                const existingResume = document.getElementById('modal-resume-link');
+                if (existingResume) existingResume.remove();
+                if (resumeUrl && resumeUrl.indexOf('uploads') !== -1) {
+                    const a = document.createElement('a');
+                    a.href = resumeUrl;
+                    a.id = 'modal-resume-link';
+                    a.textContent = 'Download Resume';
+                    a.target = '_blank';
+                    a.style.display = 'block';
+                    a.style.marginTop = '0.5rem';
+                    document.querySelector('.modal-body').appendChild(a);
+                }
+
+                modal.style.display = 'flex';
+            }
+
+            closeBtn.addEventListener('click', () => modal.style.display = 'none');
+            window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+            // Load applicants from backend
+            async function loadApplicants() {
+                const auth = ensureAuth(); if (!auth) return;
+                showLoading();
+                try {
+                    // Load employer profile (to set navbar logo)
+                    try {
+                        const p = await fetch(`${API_BASE}/employer/profile`, { headers: { 'Authorization': `Bearer ${auth.token}` } });
+                        if (p.ok) {
+                            const pj = await p.json();
+                            const pdata = (pj && pj.success) ? pj.data : pj;
+                            if (pdata && pdata.companyDetails && pdata.companyDetails.companyLogo && navProfileImg) {
+                                navProfileImg.src = normalizeUrl(pdata.companyDetails.companyLogo);
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('Failed to load employer profile for navbar logo', err);
+                    }
+
+                    const res = await fetchApplications(auth.payload.id || auth.payload._id || auth.payload.userId, auth.token);
+                    const json = (res && res.success) ? res.data : res;
+                    // Map backend shape to UI-friendly objects
+                    allApplicants = (json || []).map(item => ({
+                        applicationId: item._id || item.id,
+                        applicantId: item.applicant && (item.applicant._id || item.applicant.id),
+                        name: item.applicant && (item.applicant.name || ''),
+                        profilePic: item.applicant && item.applicant.profile && item.applicant.profile.avatar,
+                        jobTitle: item.job && (item.job.title || ''),
+                        appliedOn: item.appliedAt || item.createdAt || item.appliedAt,
+                        // Map backend raw status to display label used in UI
+                        // backend allowed: 'pending', 'reviewed', 'rejected', 'accepted'
+                        status: (function () {
+                            const raw = (item.status || 'pending').toString().toLowerCase();
+                            if (raw === 'reviewed') return 'Shortlisted';
+                            if (raw === 'accepted') return 'Accepted';
+                            if (raw === 'rejected') return 'Rejected';
+                            return 'Pending';
+                        })(),
+                        skills: item.applicant && item.applicant.profile && item.applicant.profile.skills || [],
+                        experience: item.applicant && item.applicant.profile && item.applicant.profile.experience || [],
+                        education: item.applicant && item.applicant.profile && item.applicant.profile.education || [],
+                        resume: item.applicant && item.applicant.profile && item.applicant.profile.resumeUrl || null
+                    }));
+
+                    // Build jobs list
+                    jobsList = Array.from(new Set(allApplicants.map(a => a.jobTitle).filter(Boolean)));
+                    renderJobFilter();
+                    renderApplicants();
+                } catch (err) {
+                    console.error('Load applicants failed', err);
+                    showError(err.message || 'Failed to load applicants');
+                }
+            }
+
+            // Init on DOM ready
+            document.addEventListener('DOMContentLoaded', loadApplicants);
+
+        })();
+
+        // --- ✅ START: ADDED MOBILE MENU TOGGLE SCRIPT ---
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.main-nav ul');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        });
+
+        document.querySelectorAll('.main-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Only remove active class if the menu is actually open
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-xmark');
+                }
+            });
+        });
+        // --- ✅ END: ADDED MOBILE MENU TOGGLE SCRIPT ---
+    </script>
+</body>
+</html>
